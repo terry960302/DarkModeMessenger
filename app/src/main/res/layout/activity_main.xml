@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:fab="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2E313A"
+        tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_mainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#2E313A"
+            app:titleTextColor="#fff"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent">
+        <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/myProfile_imageview_mainActivity"
+                android:layout_gravity="right"
+                android:layout_marginRight="15dp"
+                android:elevation="10dp"
+                android:src="@drawable/users"
+                android:scaleType="centerCrop"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+    </androidx.appcompat.widget.Toolbar>
+    <View
+            android:id="@+id/shadow_mainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@drawable/shadow"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_mainActivity"/>
+
+    <com.github.clans.fab.FloatingActionMenu
+            app:menu_colorNormal="#EDBB99"
+            app:menu_colorPressed="#FAE5D3"
+            app:menu_fab_size="normal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="20dp"
+            app:layout_constraintEnd_toEndOf="@+id/friendsList_recyclerview_mainActivity"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            app:layout_constraintBottom_toBottomOf="@+id/friendsList_recyclerview_mainActivity"
+            android:layout_marginBottom="16dp" android:id="@+id/floatingActionMenu2">
+        <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/search_fab_mainActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="#EDBB99"
+                app:fab_colorPressed="#FAE5D3"
+                android:src="@drawable/ic_search_black_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="친구 찾기"/>
+        <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/myPage_fab_mainActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_person_black_24dp"
+                app:fab_colorNormal="#EDBB99"
+                app:fab_colorPressed="#FAE5D3"
+                fab:fab_size="mini"
+                fab:fab_label="마이페이지"/>
+        <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/logOut_fab_mainActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mood_bad_black_24dp"
+                app:fab_colorNormal="#EDBB99"
+                app:fab_colorPressed="#FAE5D3"
+                fab:fab_size="mini"
+                fab:fab_label="로그아웃"/>
+    </com.github.clans.fab.FloatingActionMenu>
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#2E313A"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/friendsList_recyclerview_mainActivity"
+            app:layout_constraintTop_toBottomOf="@+id/shadow_mainActivity"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

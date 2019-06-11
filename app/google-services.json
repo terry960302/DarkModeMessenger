@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "183482776632",
+    "firebase_url": "https://taewanmessenger.firebaseio.com",
+    "project_id": "taewanmessenger",
+    "storage_bucket": "taewanmessenger.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183482776632:android:4e4d39b965fb2caf",
+        "android_client_info": {
+          "package_name": "com.example.taewanmessenger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183482776632-v6v9v0l4ct3fehvs815qpq4bfub1621v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.taewanmessenger",
+            "certificate_hash": "1ba609dfa08a584fd923e86c7c0de749f134c60e"
+          }
+        },
+        {
+          "client_id": "183482776632-1h4ndg6210c2en9cil812umuca37067l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrbVSIGg-UjQVMQlfYSbA5Zy9qLsmb_Cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183482776632-1h4ndg6210c2en9cil812umuca37067l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
