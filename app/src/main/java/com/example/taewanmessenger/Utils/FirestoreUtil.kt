@@ -191,4 +191,18 @@ object FirestoreUtil {
                 }
             }
     }
+    /**
+     * ChatActivity
+     * **/
+    fun chatUploadImagePath(imageUri : Uri){
+        FirebaseFirestore.getInstance()
+            .collection("채팅방")
+            .document("")
+            .collection(FirebaseAuth.getInstance().uid.toString())
+            .document("")
+            .update("imagePath", imageUri.toString())
+            .addOnSuccessListener {
+                Log.d(TAG, "채팅방에 사진 업로드를 완료했습니다.")
+            }
+    }
 }

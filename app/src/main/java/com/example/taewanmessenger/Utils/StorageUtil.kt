@@ -6,7 +6,7 @@ import com.google.firebase.storage.FirebaseStorage
 import java.util.*
 
 object StorageUtil {
-    private val firebaseAuthInstance: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val firebaseStorageInstance : FirebaseStorage by lazy { FirebaseStorage.getInstance() }
 
     fun uploadProfileImage(byteArray: ByteArray,
@@ -17,6 +17,15 @@ object StorageUtil {
             profileRef.downloadUrl.addOnSuccessListener {
                 //여기서 받은 파이어스토리지 내 uri를 이제 디비에 저장한 후 액티비티를 켤 때마다 프로필이미지를 불러온다.
                 FirestoreUtil.profileImageToFirestore(it)
+                progressDialog.dismiss()
+            }
+        }
+    }
+    fun uploadChatImage(byteArray: ByteArray, progressDialog: ProgressDialog){
+        val chatImageRef = firebaseStorageInstance.reference.child("채팅사진/${UUID.nameUUIDFromBytes(byteArray)}")
+        chatImageRef.putBytes(byteArray).addOnSuccessListener {
+            chatImageRef.downloadUrl.addOnSuccessListener {
+                FirestoreUtil.chatUploadImagePath(it)
                 progressDialog.dismiss()
             }
         }

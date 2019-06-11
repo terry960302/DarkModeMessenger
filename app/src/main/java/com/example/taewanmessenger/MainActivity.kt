@@ -96,7 +96,6 @@ class MainActivity : AppCompatActivity() {
     friendsList_recyclerview_mainActivity.layoutManager = GridLayoutManager(this, 2)
     friendsList_recyclerview_mainActivity.setHasFixedSize(true)
     friendsList_recyclerview_mainActivity.adapter = adapter
-
     }
 
     //앱 시작시 작동 메서드
