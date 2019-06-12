@@ -6,15 +6,12 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.taewanmessenger.Recyclerview.MainActivity_FriendsItem
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.Utils.FirestoreUtil
-import com.example.taewanmessenger.etc.GlideApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.xwray.groupie.GroupAdapter
-import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_my_page.*
 import org.jetbrains.anko.clearTask
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.newTask
@@ -22,7 +19,6 @@ import org.jetbrains.anko.newTask
 class MainActivity : AppCompatActivity() {
 
     private val adapter = GroupAdapter<ViewHolder>()
-    private val auth : FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +38,6 @@ class MainActivity : AppCompatActivity() {
         myProfile_imageview_mainActivity.setOnClickListener {
             startActivity(intentFor<MyPageActivity>().newTask())
         }
-
 
 
         /**

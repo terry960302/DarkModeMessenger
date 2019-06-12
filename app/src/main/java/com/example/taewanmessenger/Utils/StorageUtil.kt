@@ -1,11 +1,14 @@
 package com.example.taewanmessenger.Utils
 
 import android.app.ProgressDialog
+import android.net.Uri
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import java.util.*
 
 object StorageUtil {
+    private val TAG = "TAGStorageUtil"
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val firebaseStorageInstance : FirebaseStorage by lazy { FirebaseStorage.getInstance() }
 
@@ -21,13 +24,13 @@ object StorageUtil {
             }
         }
     }
-    fun uploadChatImage(byteArray: ByteArray, progressDialog: ProgressDialog){
-        val chatImageRef = firebaseStorageInstance.reference.child("채팅사진/${UUID.nameUUIDFromBytes(byteArray)}")
-        chatImageRef.putBytes(byteArray).addOnSuccessListener {
-            chatImageRef.downloadUrl.addOnSuccessListener {
-                FirestoreUtil.chatUploadImagePath(it)
-                progressDialog.dismiss()
-            }
-        }
-    }
+//    fun uploadChatImage(byteArray: ByteArray, chatChannelId : String, onComplete:()-> Unit){
+//        val chatImageRef = firebaseStorageInstance.reference.child("채팅사진/${UUID.nameUUIDFromBytes(byteArray)}")
+//        chatImageRef.putBytes(byteArray).addOnSuccessListener {
+//            chatImageRef.downloadUrl.addOnSuccessListener {
+//                FirestoreUtil.sendImageMessage(it, chatChannelId)
+//                Log.d(TAG,"변환된 이미지의 URL을 다운받았습니다.")
+//            }
+//        }
+//    }
 }

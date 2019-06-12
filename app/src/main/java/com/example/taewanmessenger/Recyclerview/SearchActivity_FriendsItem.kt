@@ -77,17 +77,36 @@ class SearchActivity_FriendsItem(val context: Context,
         dialog.show()
     }
     private val addFriendListener = View.OnClickListener{
-        Toast.makeText(context, "'${usermodel.name}'님과 친구가 되었습니다.", Toast.LENGTH_SHORT).show()
 
-        FirebaseFirestore.getInstance()
-            .collection("유저")
+        FirebaseFirestore.getInstance().collection("유저")
             .document(FirebaseAuth.getInstance().uid.toString())
             .collection("친구목록")
             .document(usermodel.uid)
-            .set(usermodel)
+            .get().addOnSuccessListener {
+                //이미 친구인지 확인
+                if(it.exists()){
+                    Toast.makeText(context, "이미 친구입니다.", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+                else{
+                    //자기자신과 친구못하게 막음
+                    if(usermodel.uid != FirebaseAuth.getInstance().uid.toString()){
+                        Toast.makeText(context, " '${usermodel.name}' 님과 친구가 되었습니다.", Toast.LENGTH_SHORT).show()
 
-        dialog.dismiss()
+                        FirebaseFirestore.getInstance()
+                            .collection("유저")
+                            .document(FirebaseAuth.getInstance().uid.toString())
+                            .collection("친구목록")
+                            .document(usermodel.uid)
+                            .set(usermodel)
 
-
+                        dialog.dismiss()
+                    }
+                    else{
+                        Toast.makeText(context, "자기자신을 친구로 추가할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                }
+            }
     }
 }

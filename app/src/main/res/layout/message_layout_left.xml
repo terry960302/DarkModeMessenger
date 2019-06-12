@@ -23,17 +23,18 @@
 
         <TextView
                 android:text="여긴 내용이 들어갑니다."
+                android:textSize="11sp"
                 android:layout_margin="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxWidth="250dp"
                 android:id="@+id/chatLog_textview_left"/>
         <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
                 android:layout_margin="10dp"
-                android:maxWidth="250dp"
-                android:maxHeight="250dp"
+                android:visibility="gone"
+                android:scaleType="centerCrop"
                 android:id="@+id/chatLog_imageview_left"/>
     </androidx.cardview.widget.CardView>
     <de.hdodenhof.circleimageview.CircleImageView

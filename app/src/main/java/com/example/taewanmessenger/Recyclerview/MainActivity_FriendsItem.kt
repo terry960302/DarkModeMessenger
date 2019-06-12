@@ -1,6 +1,8 @@
 package com.example.taewanmessenger.Recyclerview
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_main_friends_item.view.*
+import org.jetbrains.anko.sdk27.coroutines.onLongClick
 import java.util.*
 
 class MainActivity_FriendsItem(val context : Context,
@@ -51,7 +54,7 @@ class MainActivity_FriendsItem(val context : Context,
          * **/
 
 
-        //아이템 클릭
+        //아이템 짧게 클릭
         viewHolder.itemView.setOnClickListener {
 
             //본인의 채팅방 경로
@@ -95,6 +98,26 @@ class MainActivity_FriendsItem(val context : Context,
                     }
                 chatChannelId = channelRef.id
                 // -> 이렇게 되면 하나의 채팅방을 둘이서 공유하는 방식이 됨.
+            }
+            viewHolder.itemView.setOnLongClickListener {
+                AlertDialog.Builder(context)
+                    .setMessage("친구를 삭제하시겠습니까?")
+                    .setCancelable(true)
+                    .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog, which ->
+                        FirebaseFirestore.getInstance()
+                            .collection("유저")
+                            .document(FirebaseAuth.getInstance().uid.toString())
+                            .collection("친구목록")
+                            .document(user.uid)
+                            .delete().addOnSuccessListener {
+                                Log.d(TAG, "${user.name}님이 친구목록에서 삭제되었습니다.")
+                            }
+                    })
+                    .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
+                        dialog.cancel()
+                    })
+                return@setOnLongClickListener true
+
             }
 
 

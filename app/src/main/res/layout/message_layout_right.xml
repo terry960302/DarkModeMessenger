@@ -22,17 +22,19 @@
             app:layout_constraintEnd_toStartOf="@+id/myImage_imageview_message" android:layout_marginRight="8dp">
         <TextView
                 android:text="여긴 내용이 들어갑니다."
+                android:textSize="11sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxWidth="250dp"
                 android:layout_margin="10dp"
                 android:id="@+id/chatLog_textview_chatActivity"/>
         <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
                 android:layout_margin="10dp"
-                android:maxHeight="250dp"
-                android:maxWidth="250dp" android:id="@+id/chatLog_imageview_chatActivity"/>
+                android:visibility="gone"
+                android:scaleType="centerCrop"
+                android:id="@+id/chatLog_imageview_chatActivity"/>
     </androidx.cardview.widget.CardView>
     <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/myImage_imageview_message"

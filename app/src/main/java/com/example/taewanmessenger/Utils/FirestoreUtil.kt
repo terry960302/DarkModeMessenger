@@ -1,6 +1,7 @@
 package com.example.taewanmessenger.Utils
 
 import android.R
+import android.app.ProgressDialog
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -197,18 +198,20 @@ object FirestoreUtil {
     /**
      * ChatActivity
      * **/
-    fun chatUploadImagePath(imageUri : Uri){
-        FirebaseFirestore.getInstance()
-            .collection("채팅방")
-            .document("")
-            .collection(FirebaseAuth.getInstance().uid.toString())
-            .document("")
-            .update("imagePath", imageUri.toString())
+    fun getChannelId(userInfo : UserModel, onComplete: (String) -> Unit){
+        firestoreInstance
+            .collection("유저")
+            .document(auth.currentUser?.uid.toString())
+            .collection("채팅상대방")
+            .document(userInfo.uid)
+            .get()
             .addOnSuccessListener {
-                Log.d(TAG, "채팅방에 사진 업로드를 완료했습니다.")
+                val channelId = it.get("channelId").toString()
+                onComplete(channelId)
             }
+
     }
-    fun sendMessage(chatChannelId : String, edittext : EditText, onComplete: () -> Unit){
+    fun sendTextMessage(chatChannelId : String, edittext : EditText, onComplete: () -> Unit){
         //메시지 보내질 경우 채팅방에 내가 쓴 글이 쌓임
         FirebaseFirestore.getInstance()
             .collection("채팅방")
@@ -224,19 +227,4 @@ object FirestoreUtil {
             ))
         onComplete()
     }
-//    fun getMyInfo(onComplete: (UserModel) -> Unit){
-//        firestoreInstance.collection("유저")
-//            .document(auth.currentUser?.uid.toString())
-//            .get()
-//            .addOnSuccessListener {
-//                val myInfo = UserModel(
-//                    uid = it["uid"].toString(),
-//                    name = it["name"].toString(),
-//                    email = it["email"].toString(),
-//                    profileImagePath = it["profileImagePath"].toString(),
-//                    bio = it["bio"].toString()
-//                )
-//                onComplete(myInfo)
-//            }
-//    }
 }

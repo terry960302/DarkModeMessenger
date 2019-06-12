@@ -1,6 +1,7 @@
 package com.example.taewanmessenger.Recyclerview
 
 import android.content.Context
+import android.view.View
 import android.view.animation.AnimationUtils
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.R
@@ -20,9 +21,25 @@ class chatOtherToMe(val context : Context,
         val format = SimpleDateFormat("yyyy년 MM월 dd일 HH시 mm분 ss초")
         val date = format.format(Date(chatModel.time))
         viewHolder.itemView.chatTime_textview_left.text = date
-        GlideApp.with(context)
-            .load(chatModel.imagePath)
-            .into(viewHolder.itemView.chatLog_imageview_left)
+
+        //이미지를 올렸을 경우에 없었던 이미지칸이 생기게 함.
+        if(chatModel.imagePath != null && chatModel.desc == ""){
+            viewHolder.itemView.chatLog_imageview_left.visibility = View.VISIBLE
+            GlideApp.with(context)
+                .load(chatModel.imagePath)
+                .into(viewHolder.itemView.chatLog_imageview_left)
+        }
+        else{
+            viewHolder.itemView.chatLog_imageview_left.visibility = View.GONE
+        }
+
+
+        viewHolder.itemView.setOnClickListener {
+            //클릭했을 때 이미지일 경우만 반응
+            if(chatModel.imagePath != null && chatModel.desc == ""){
+
+            }
+        }
 
         //애니메이션
         val animation = AnimationUtils.loadAnimation(context, R.anim.up_from_bottom)

@@ -21,8 +21,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:elevation="10dp"
-                android:layout_gravity="right"
-                android:layout_marginRight="15dp"/>
+                android:layout_gravity="left"
+                android:layout_marginLeft="15dp"/>
     </androidx.appcompat.widget.Toolbar>
     <View
             android:id="@+id/shadow_chatActivity"
@@ -85,39 +85,40 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:tint="#EE9B4D"
-                app:srcCompat="@drawable/ic_camera_alt_black_24dp"
+                android:src="@drawable/ic_camera_alt_black_24dp"
                 android:id="@+id/cameraBtn_imageview_chatActivity"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline"
                 app:layout_constraintStart_toEndOf="@+id/chatInsert_edittext_chatActivity"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/voiceBtn_imageview_chatActivity"
+                app:layout_constraintEnd_toStartOf="@+id/moreBtn_imageview_chatActivity"
                 android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
         <ImageView
                 android:layout_width="25dp"
                 android:layout_height="0dp"
                 android:tint="#EE9B4D"
-                app:srcCompat="@drawable/ic_mic_black_24dp"
-                android:id="@+id/voiceBtn_imageview_chatActivity"
+                android:src="@drawable/ic_add_circle_outline_black_24dp"
+                android:id="@+id/moreBtn_imageview_chatActivity"
                 app:layout_constraintStart_toEndOf="@+id/cameraBtn_imageview_chatActivity"
                 app:layout_constraintTop_toTopOf="@+id/cameraBtn_imageview_chatActivity"
                 app:layout_constraintBottom_toBottomOf="@+id/cameraBtn_imageview_chatActivity"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/moreBtn_imageview_chatActivity"/>
+                app:layout_constraintEnd_toStartOf="@+id/sendBtn_imageview_chatActivity"/>
         <ImageView
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:tint="#EE9B4D"
-                app:srcCompat="@drawable/ic_add_circle_outline_black_24dp"
-                android:id="@+id/moreBtn_imageview_chatActivity"
-                app:layout_constraintTop_toTopOf="@+id/voiceBtn_imageview_chatActivity"
-                app:layout_constraintBottom_toBottomOf="@+id/voiceBtn_imageview_chatActivity"
-                app:layout_constraintStart_toEndOf="@+id/voiceBtn_imageview_chatActivity"
+                android:src="@drawable/ic_sent_mail"
+                android:id="@+id/sendBtn_imageview_chatActivity"
+                app:layout_constraintTop_toTopOf="@+id/moreBtn_imageview_chatActivity"
+                app:layout_constraintBottom_toBottomOf="@+id/moreBtn_imageview_chatActivity"
+                app:layout_constraintStart_toEndOf="@+id/moreBtn_imageview_chatActivity"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="0dp"
             android:background="@drawable/gradation_style"
             android:layout_height="1dp"
