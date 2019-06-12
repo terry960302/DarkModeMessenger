@@ -47,7 +47,12 @@ class Dialog_in_SearchItemClicked(context: Context,
         //이메일 설정
         userEmail_textview_searchActivity.text = profileEmail
         //자기소개 설정
-        userBio_textview_searchActivity.text = profileBio
+        if(profileBio == null){
+            userBio_textview_searchActivity.text = ""
+        }
+        else{
+            userBio_textview_searchActivity.text = profileBio
+        }
 
         //친구 추가 누를시 이벤트가 FriendsItem_in_Search로 이동함.
         addFriend_button_searchActivity.setOnClickListener(btnListener)

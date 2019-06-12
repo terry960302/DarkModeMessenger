@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_my_page.*
@@ -90,8 +91,10 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+                adapter.notifyItemChanged(adapter.itemCount)
             }
         }
+
     //리사이클러뷰 설정
     friendsList_recyclerview_mainActivity.layoutManager = GridLayoutManager(this, 2)
     friendsList_recyclerview_mainActivity.setHasFixedSize(true)

@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.R
 import com.example.taewanmessenger.SearchActivity
+import com.example.taewanmessenger.Utils.FirestoreUtil
 import com.example.taewanmessenger.etc.Dialog_in_SearchItemClicked
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.android.material.snackbar.Snackbar
@@ -52,20 +53,18 @@ class SearchActivity_FriendsItem(val context: Context,
                 .into(image)
         }
 
-
         //아이템이 로드될 때마다 애니메이션 실행
         val animationFade = AlphaAnimation(0.0F, 1.0F)
         animationFade.duration = 500
         viewHolder.itemView.animation = animationFade
 
-        //아이템을 클릭하면 생기는 이벤트
+        //아이템을 클릭하면 다이얼로그 생성
         item.setOnClickListener {
-            Toast.makeText(context, "안녕", Toast.LENGTH_SHORT).show()
-            Log.d(TAG, "검색한 목록의 이미지경로 = ${usermodel.profileImagePath.toString()}")
             callDialog(it.context)//https://stackoverflow.com/questions/28104663/unable-to-show-alertdialog-on-button-click-in-a-listview 이 사이트로 문제 해결.....후..
         }
     }
     fun callDialog(context : Context){
+
         dialog = Dialog_in_SearchItemClicked(
             context = context,
             profileImagePath = usermodel.profileImagePath,
@@ -75,17 +74,20 @@ class SearchActivity_FriendsItem(val context: Context,
             btnListener = addFriendListener)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-//        dialog.window.attributes.windowAnimations = R.anim.popup_for_dialog//다이얼로그 애니메이션
         dialog.show()
     }
     private val addFriendListener = View.OnClickListener{
         Toast.makeText(context, "'${usermodel.name}'님과 친구가 되었습니다.", Toast.LENGTH_SHORT).show()
-        dialog.dismiss()
 
-        FirebaseFirestore.getInstance().collection("유저")
+        FirebaseFirestore.getInstance()
+            .collection("유저")
             .document(FirebaseAuth.getInstance().uid.toString())
             .collection("친구목록")
             .document(usermodel.uid)
             .set(usermodel)
+
+        dialog.dismiss()
+
+
     }
 }

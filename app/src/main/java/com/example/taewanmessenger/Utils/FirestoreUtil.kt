@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import android.widget.TextView
+import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.Recyclerview.SearchActivity_FriendsItem
 import com.example.taewanmessenger.etc.GlideApp
@@ -132,12 +134,13 @@ object FirestoreUtil {
                     result?.forEach {
                         //이름중에 포함될 경우
                         if(searchedText in it["name"].toString()){
+                            val uid = it["uid"].toString()
                             val name = it["name"].toString()
                             val email = it["email"].toString()
                             val bio = it["bio"].toString()
                             val profileImagePath = it["profileImagePath"].toString()
                             val searchedUser = UserModel(
-                                uid = auth.uid.toString(),
+                                uid = uid,//여기서 내 uid집어넣어서 오류계속 걸렸음 ㅅ불탱
                                 name = name,
                                 email = email,
                                 bio = bio,
@@ -205,4 +208,35 @@ object FirestoreUtil {
                 Log.d(TAG, "채팅방에 사진 업로드를 완료했습니다.")
             }
     }
+    fun sendMessage(chatChannelId : String, edittext : EditText, onComplete: () -> Unit){
+        //메시지 보내질 경우 채팅방에 내가 쓴 글이 쌓임
+        FirebaseFirestore.getInstance()
+            .collection("채팅방")
+            .document(chatChannelId)//null값으로 나오는 에러가 있음
+            .collection("채팅목록")
+            .document()//도큐먼트 아이디는 사용할 이유가 없으니 랜덤으로
+            .set(
+                ChatModel(
+                fromId = auth.uid.toString(),//보낸 사람의 id필요
+                desc = edittext.text.toString(),
+                imagePath = null,//텍스트를 보내는 경우엔 이미지는 null
+                time = System.currentTimeMillis()//시간순으로 나중에 정렬해야하므로
+            ))
+        onComplete()
+    }
+//    fun getMyInfo(onComplete: (UserModel) -> Unit){
+//        firestoreInstance.collection("유저")
+//            .document(auth.currentUser?.uid.toString())
+//            .get()
+//            .addOnSuccessListener {
+//                val myInfo = UserModel(
+//                    uid = it["uid"].toString(),
+//                    name = it["name"].toString(),
+//                    email = it["email"].toString(),
+//                    profileImagePath = it["profileImagePath"].toString(),
+//                    bio = it["bio"].toString()
+//                )
+//                onComplete(myInfo)
+//            }
+//    }
 }

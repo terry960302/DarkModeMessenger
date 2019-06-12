@@ -47,46 +47,88 @@ class MainActivity_FriendsItem(val context : Context,
         viewHolder.itemView.animation = animationFade
 
         /**
-         * 친구를 골라서 들어가게 되면 채팅방 DB생성 -> 유저 정보를 다음 창인 ChatActivity로 보냄.
+         * 친구골라서 아이템 클릭 -> 채팅방 DB생성 -> 유저 정보를 다음 창인 ChatActivity로 보냄.
          * **/
+
+
+        //아이템 클릭
         viewHolder.itemView.setOnClickListener {
 
-            //채팅방 db생성
-            chatChannelId = UUID.randomUUID().toString()//이렇게 하면 들어갈 때마다 방이 새로 생길듯
-            FirebaseFirestore.getInstance()
-                .collection("채팅방")
-                .document(chatChannelId)
-                .set(mapOf("channelId" to chatChannelId))
-            Log.d(TAG, "채팅방(${chatChannelId}) 생성이 완료되었습니다.")
+            //본인의 채팅방 경로
+            val myChannelRef = FirebaseFirestore.getInstance()
+                .collection("유저")
+                .document(auth.currentUser?.uid.toString())
+                .collection("채팅상대방")
+                .document(user.uid)
+            //상대방의 채팅방 경로
+            val yourChannelRef = FirebaseFirestore.getInstance()
+                .collection("유저")
+                .document(user.uid)
+                .collection("채팅상대방")
+                .document(auth.currentUser?.uid.toString())
+
+            Log.d(TAG, "채팅하고자하는 상대방의 이름은 ${user.name}입니다.")
+
+            //이미 채팅방이 만들어져있는지 확인
+            myChannelRef.get().addOnSuccessListener {
+                if(it.exists()){
+                    chatChannelId = it["channelId"].toString()
+                    return@addOnSuccessListener
+                }
+
+                //채팅방을 이름으로 해서 컬렉션 만들어줌.
+                val channelRef = FirebaseFirestore.getInstance()
+                    .collection("채팅방")
+                    .document()
+
+                channelRef.set(mapOf("0" to auth.currentUser?.uid.toString(), "1" to user.uid))
+
+                //채팅방 컬렉션에서 만든 도큐먼트 아이디를 유저 컬렉션 서브컬렉션에 저장
+                myChannelRef.set(mapOf("channelId" to channelRef.id))//내꺼에도 채팅방 아이디 만들어주고
+                    .addOnSuccessListener {
+                        Log.d(TAG, "본인 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
+                    }
+
+                yourChannelRef.set(mapOf("channelId" to channelRef.id))//상대방꺼에 동시에 채팅방 아이디 만들어줌
+                    .addOnSuccessListener {
+                        Log.d(TAG, "상대방 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
+                    }
+                chatChannelId = channelRef.id
+                // -> 이렇게 되면 하나의 채팅방을 둘이서 공유하는 방식이 됨.
+            }
+
 
             //다음 창 이동 + 유저 데이터(내정보 + 친구 정보 + 채팅방 id) 보내기
             val intent = Intent(context, ChatActivity::class.java)
             val bundle = Bundle()
             bundle.putSerializable("userInfo", user)//모델전체를 보내려면 모델클래스에서 Serializable하게 확장해줘야함.
-            FirebaseFirestore.getInstance()
-                .collection("유저")
-                .document(auth.uid.toString())
-                .get()
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        val result = it.result
-
-                        val uid = result?.get("uid").toString()
-                        val name = result?.get("name").toString()
-                        val email = result?.get("email").toString()
-                        val bio = result?.get("bio").toString()
-                        val profileImagePath = result?.get("profileImagePath").toString()
-
-                        myInfo = UserModel(uid, name, email, bio, profileImagePath)
-
-                        bundle.putSerializable("myInfo", myInfo)
-                        intent.putExtras(bundle)
-                        intent.putExtra("chatChannelId", chatChannelId)
-                        context.startActivity(intent)
-
-                        Log.d(TAG, "MainActivity_FriendsItem -> ChatActivity로 이동합니다.")
-                    }
-                }
+            intent.putExtras(bundle)
+            context.startActivity(intent)
+            Log.d(TAG, "MainActivity_FriendsItem -> ChatActivity로 이동합니다.")
+//                //내 정보 가져오기
+//            FirebaseFirestore.getInstance()
+//                .collection("유저")
+//                .document(auth.uid.toString())
+//                .get()
+//                .addOnCompleteListener {
+//                    if (it.isSuccessful) {
+//                        val result = it.result
+//
+//                        val uid = result?.get("uid").toString()
+//                        val name = result?.get("name").toString()
+//                        val email = result?.get("email").toString()
+//                        val bio = result?.get("bio").toString()
+//                        val profileImagePath = result?.get("profileImagePath").toString()
+//
+//                        myInfo = UserModel(uid, name, email, bio, profileImagePath)
+//
+//                        bundle.putSerializable("myInfo", myInfo)
+//                        intent.putExtras(bundle)
+//                        context.startActivity(intent)
+//
+//                        Log.d(TAG, "MainActivity_FriendsItem -> ChatActivity로 이동합니다.")
+//                    }
+//                }
         }
     }
 }

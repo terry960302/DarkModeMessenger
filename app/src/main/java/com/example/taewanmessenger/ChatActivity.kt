@@ -10,12 +10,14 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taewanmessenger.Recyclerview.chatMeToOther
 import com.example.taewanmessenger.Recyclerview.chatOtherToMe
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.Models.UserModel
+import com.example.taewanmessenger.Utils.FirestoreUtil
 import com.example.taewanmessenger.Utils.StorageUtil
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.firebase.auth.FirebaseAuth
@@ -39,9 +41,9 @@ class ChatActivity : AppCompatActivity() {
     val adapter = GroupAdapter<ViewHolder>()
     private val TAG = "TAGChatActivity"
     lateinit var userInfo : UserModel
-    lateinit var myInfo: UserModel
     private val RC_GALLERY = 1003
     lateinit var chatChannelId : String
+    private val auth : FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +54,6 @@ class ChatActivity : AppCompatActivity() {
          ***/
         val intent = this.intent
         userInfo = intent.extras.getSerializable("userInfo") as UserModel
-        myInfo = intent.extras.getSerializable("myInfo") as UserModel
-        chatChannelId = intent.getStringExtra("chatChannelId")//채팅방 도규먼트 아이디
 
         /**
          * 툴바 설정
@@ -63,65 +63,135 @@ class ChatActivity : AppCompatActivity() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_left_arrow)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.title = userInfo.name//채팅 상대방이름으로 등록
+        //툴바에 상대방 이미지 등록
+        GlideApp.with(this)
+            .load(userInfo.profileImagePath)
+            .into(myProfile_imageview_chatActivity)
 
         /**
-         * 리사이클러뷰 설정
+         * 채팅방 생성(파이어스토어)
          * **/
-        initRecyclerview(this, chatChannelId, adapter)
+//        //본인의 채팅방 경로
+//        val myChannelRef = FirebaseFirestore.getInstance()
+//            .collection("유저")
+//            .document(auth.uid.toString())
+//            .collection("채팅상대방")
+//            .document(user.uid)
+//        //상대방의 채팅방 경로
+//        val yourChannelRef = FirebaseFirestore.getInstance()
+//            .collection("유저")
+//            .document(user.uid)
+//            .collection("채팅상대방")
+//            .document(auth.uid.toString())
+//        myChannelRef.get().addOnSuccessListener {
+//            if(it.exists()){
+//                chatChannelId = it["channelId"].toString()
+//            }
+//
+//            //채팅방을 이름으로 해서 컬렉션 만들어줌.
+//            val channelRef = FirebaseFirestore.getInstance()
+//                .collection("채팅방")
+//                .document()
+//
+//            channelRef.set(mutableListOf(auth.uid.toString(), user.uid))
+//
+//            //채팅방 컬렉션에서 만든 도큐먼트 아이디를 유저 컬렉션 서브컬렉션에 저장
+//            myChannelRef.set(mapOf("channelId" to channelRef.id))//내꺼에도 채팅방 아이디 만들어주고
+//                .addOnSuccessListener {
+//                    Log.d(TAG, "본인 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
+//                }
+//
+//            yourChannelRef.set(mapOf("channelId" to channelRef.id))//상대방꺼에 동시에 채팅방 아이디 만들어줌
+//                .addOnSuccessListener {
+//                    Log.d(TAG, "상대방 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
+//                }
+//            // -> 이렇게 되면 하나의 채팅방을 둘이서 공유하는 방식이 됨.
+//        }
 
+        FirebaseFirestore.getInstance()
+            .collection("유저")
+            .document(auth.currentUser?.uid.toString())
+            .collection("채팅상대방")
+            .document(userInfo.uid)
+            .get()
+            .addOnSuccessListener {
+                chatChannelId = it.get("channelId").toString()
 
-        /**
-         * 채팅 연습용
-         * **/
-        //메시지 보내기 버튼
-        moreBtn_imageview_chatActivity.setOnClickListener {
-            if(TextUtils.isEmpty(chatInsert_edittext_chatActivity.text)){
-                toast("메시지를 작성해주세요.")
+                /**
+                 * 리사이클러뷰 설정
+                 * **/
+                initRecyclerview(this, adapter, chatChannelId)
+
+                /**
+                 * 채팅보내기 설정
+                 * **/
+                //텍스트 메시지 보내기 버튼
+                moreBtn_imageview_chatActivity.setOnClickListener {
+                    if (TextUtils.isEmpty(chatInsert_edittext_chatActivity.text)) {
+                        toast("메시지를 작성해주세요.")
+                    } else {
+                        FirestoreUtil.sendMessage(chatChannelId, chatInsert_edittext_chatActivity) {
+                            //다 보내고 나면 텍스트를 싹 지워준다.
+                            chatInsert_edittext_chatActivity.text.clear()
+                        }
+                    }
+                }
+                //이미지 메시지 보내기 버튼
+                cameraBtn_imageview_chatActivity.setOnClickListener {
+                    //여기서 갤러리 들어가는 과정
+                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    startActivityForResult(intent, RC_GALLERY)
+                }
+
             }
-            else{
-                //메시지 보내질 경우 채팅방에 내가 쓴 글이 쌓임
-                FirebaseFirestore.getInstance()
-                    .collection("채팅방")
-                    .document(chatChannelId)
-                    .collection("채팅목록")
-                    .document()//도큐먼트 아이디는 사용할 이유가 없으니 랜덤으로
-                    .set(ChatModel(
-                        fromId = myInfo.uid,//보낸 사람의 id필요
-                        desc = chatInsert_edittext_chatActivity.text.toString(),
-                        imagePath = null,//텍스트를 보내는 경우엔 이미지는 null
-                        time = System.currentTimeMillis()//시간순으로 나중에 정렬해야하므로
-                    ))
-                //다 보내고 나면 텍스트를 싹 지워준다.
-                chatInsert_edittext_chatActivity.text.clear()
-            }
-        }
-        //이미지보내기 버튼
-        cameraBtn_imageview_chatActivity.setOnClickListener {
-            //여기서 갤러리 들어가는 과정
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            startActivityForResult(intent, RC_GALLERY)
-        }
+
+//        /**
+//         * 리사이클러뷰 설정
+//         * **/
+//        initRecyclerview(this, adapter, chatChannelId)
+//
+//        /**
+//         * 채팅보내기 설정
+//         * **/
+//        //텍스트 메시지 보내기 버튼
+//        moreBtn_imageview_chatActivity.setOnClickListener {
+//            if (TextUtils.isEmpty(chatInsert_edittext_chatActivity.text)) {
+//                toast("메시지를 작성해주세요.")
+//            } else {
+//                FirestoreUtil.sendMessage(chatChannelId, chatInsert_edittext_chatActivity) {
+//                    //다 보내고 나면 텍스트를 싹 지워준다.
+//                    chatInsert_edittext_chatActivity.text.clear()
+//                }
+//            }
+//        }
+//        //이미지 메시지 보내기 버튼
+//        cameraBtn_imageview_chatActivity.setOnClickListener {
+//            //여기서 갤러리 들어가는 과정
+//            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+//            startActivityForResult(intent, RC_GALLERY)
+//        }
     }
     /**
      * 여러 메서드들
      * **/
     fun initRecyclerview(context : Context,
-                         chatChannelId : String,
-                         adapter : GroupAdapter<ViewHolder>){
+                         adapter : GroupAdapter<ViewHolder>,
+                         chatChannelId : String){
         //리사이클러뷰 기본 설정
         val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         chats_recyclerview_chatActivity.layoutManager = lm
         chats_recyclerview_chatActivity.adapter = adapter
-        if(chats_recyclerview_chatActivity.adapter!!.itemCount > 0){
-            chats_recyclerview_chatActivity.scrollToPosition(chats_recyclerview_chatActivity.adapter!!.itemCount -1)
-        }
+//        if(chats_recyclerview_chatActivity.adapter!!.itemCount > 0){
+//            chats_recyclerview_chatActivity.scrollToPosition(chats_recyclerview_chatActivity.adapter!!.itemCount -1)
+//        }
+
 
         //기존에 카톡했던 내용을 시간순서대로 띄워줌
         FirebaseFirestore.getInstance()
             .collection("채팅방")
             .document(chatChannelId)
             .collection("채팅목록")
-            .orderBy("time", Query.Direction.DESCENDING)
+            .orderBy("time", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, exception ->
                 if(exception != null) return@addSnapshotListener
                 if(snapshot != null){
@@ -130,7 +200,7 @@ class ChatActivity : AppCompatActivity() {
                             DocumentChange.Type.ADDED -> {
                                 val id = dc.document["fromId"].toString()
                                 val desc = dc.document["desc"].toString()
-                                val imagePath = dc.document["imaegPath"].toString()
+                                val imagePath = dc.document["imagePath"].toString()
                                 val time = dc.document["time"] as Long
 
                                 val chatLog = ChatModel(
@@ -139,7 +209,6 @@ class ChatActivity : AppCompatActivity() {
                                     imagePath = imagePath,
                                     time = time)
 
-                                Log.d(TAG, "")
                                 //만약 내가 쓴글일 경우 오른쪽에 붙이고 상대방이 쓴 글이면 왼쪽에 붙임
                                 if(id == FirebaseAuth.getInstance().uid.toString()){
                                     adapter.add(chatMeToOther(context, chatLog))
@@ -149,6 +218,7 @@ class ChatActivity : AppCompatActivity() {
                                     adapter.add(chatOtherToMe(context, chatLog))
                                     adapter.notifyItemChanged(adapter.itemCount)
                                 }
+                                chats_recyclerview_chatActivity.scrollToPosition(adapter.itemCount-1)
                             }
                         }
                     }
