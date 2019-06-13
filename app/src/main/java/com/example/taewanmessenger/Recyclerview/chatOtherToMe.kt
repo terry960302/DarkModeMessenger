@@ -2,10 +2,12 @@ package com.example.taewanmessenger.Recyclerview
 
 import android.content.Context
 import android.view.View
+import android.view.Window
 import android.view.animation.AnimationUtils
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.R
 import com.example.taewanmessenger.etc.GlideApp
+import com.example.taewanmessenger.etc.ZoomDialog
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.message_layout_left.view.*
@@ -14,6 +16,9 @@ import java.util.*
 
 class chatOtherToMe(val context : Context,
                     val chatModel: ChatModel) : Item<ViewHolder>() {
+
+    lateinit var dialog : ZoomDialog
+
     override fun getLayout(): Int = R.layout.message_layout_left
 
     override fun bind(viewHolder: ViewHolder, position: Int) {
@@ -37,7 +42,9 @@ class chatOtherToMe(val context : Context,
         viewHolder.itemView.setOnClickListener {
             //클릭했을 때 이미지일 경우만 반응
             if(chatModel.imagePath != null && chatModel.desc == ""){
-
+                dialog = ZoomDialog(it.context, chatModel.imagePath)
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                dialog.show()
             }
         }
 

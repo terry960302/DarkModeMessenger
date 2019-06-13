@@ -18,8 +18,8 @@
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/chatTime_textview_chatActivity"
             android:id="@+id/chatLog_cardview_chatActivity"
-            app:layout_constraintVertical_bias="0.0" android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/myImage_imageview_message" android:layout_marginRight="8dp">
+            app:layout_constraintVertical_bias="0.0"
+            android:layout_marginEnd="16dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="16dp">
         <TextView
                 android:text="여긴 내용이 들어갑니다."
                 android:textSize="11sp"
@@ -36,15 +36,6 @@
                 android:scaleType="centerCrop"
                 android:id="@+id/chatLog_imageview_chatActivity"/>
     </androidx.cardview.widget.CardView>
-    <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/myImage_imageview_message"
-            android:background="@drawable/users"
-            android:scaleType="centerCrop"
-            android:layout_width="40dp"
-            android:layout_height="40dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            app:layout_constraintTop_toTopOf="@+id/chatLog_cardview_chatActivity"
-            app:layout_constraintBottom_toBottomOf="@+id/chatLog_cardview_chatActivity"/>
     <TextView
             android:text="2019년 6월 6일 2시 30분 45초"
             android:textColor="#fff"
@@ -53,6 +44,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/chatTime_textview_chatActivity" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginRight="8dp"/>
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

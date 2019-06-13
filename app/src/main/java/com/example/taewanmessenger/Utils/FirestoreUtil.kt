@@ -6,18 +6,21 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
+import androidx.recyclerview.widget.RecyclerView
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.Models.UserModel
+import com.example.taewanmessenger.Recyclerview.MainActivity_FriendsItem
 import com.example.taewanmessenger.Recyclerview.SearchActivity_FriendsItem
+import com.example.taewanmessenger.Recyclerview.chatMeToOther
+import com.example.taewanmessenger.Recyclerview.chatOtherToMe
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
 import de.hdodenhof.circleimageview.CircleImageView
@@ -100,34 +103,7 @@ object FirestoreUtil {
     fun fetchSearchedUser(context : Context, adapter : GroupAdapter<ViewHolder>, searchedText : String, textview : TextView, onComplete :() -> Unit){
         firestoreInstance
             .collection("유저")
-                //무조건 검색한 값이 동일한 경우만 리사이클러뷰에 띄워줌
-//            .whereEqualTo("name", searchedText)
-//            .get()
-//            .addOnCompleteListener {
-//                if(it.isSuccessful){
-//                    Log.d(TAG, "onQueryTextChange -> addOnCompleteListener")
-//                    val result = it.result
-//                    result?.forEach {
-//                        val name = it["name"].toString()
-//                        val email = it["email"].toString()
-//                        val bio = it["bio"].toString()
-//                        val profileImagePath = it["profileImagePath"].toString()
-//                        val searchedUser = UserModel(name = name, email = email,bio = bio, profileImagePath = profileImagePath)
-//                        adapter.add(MainActivity_FriendsItem(context, searchedUser))
-//                        Log.d(TAG, "어댑터에 검색한 친구목록 띄우기 성공")
-//                        //검색한 목록이 나오니 경고문은 없애줌.
-//                        textview.visibility = View.GONE
-//                        onComplete()
-//                    }
-//                }
-//                //검색결과가 없을 경우
-//                if(adapter.getItemCount() == 0){
-//                    //검색결과가 없다는 글자를 보여줌.
-//                    textview.visibility = View.VISIBLE
-//                    onComplete()
-//                }
-//            }
-                //작성한 글자중에 아이디에 한 자라도 포함되면 띄워줌
+            //작성한 글자중에 아이디에 한 자라도 포함되면 띄워줌
             .get()
             .addOnCompleteListener {
                 if(it.isSuccessful){
@@ -176,6 +152,44 @@ object FirestoreUtil {
     /**
      * MainActivity
      * **/
+    //내 친구들 다 불러오기
+    fun fetchMyFriends(context : Context, adapter : GroupAdapter<ViewHolder>, progressDialog : ProgressDialog){
+        FirebaseFirestore.getInstance()
+            .collection("유저")
+            .document(FirebaseAuth.getInstance().uid.toString())
+            .collection("친구목록")
+            .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if(firebaseFirestoreException != null) return@addSnapshotListener
+                if(querySnapshot != null){
+                    for(dc in querySnapshot.documentChanges){
+                        when(dc.type){
+                            DocumentChange.Type.ADDED ->{
+
+                                val otherUid = dc.document["uid"].toString()
+
+                                FirebaseFirestore.getInstance()
+                                    .collection("유저")
+                                    .whereEqualTo("uid", otherUid)
+                                    .orderBy("email", Query.Direction.DESCENDING)
+                                    .addSnapshotListener { snapshot, exception ->
+                                        if(exception != null) return@addSnapshotListener
+                                        if(snapshot != null){
+                                            snapshot.forEach {
+                                                val otherUser = it.toObject(UserModel::class.java)
+                                                adapter.add(MainActivity_FriendsItem(context, otherUser))
+                                                Log.d(TAG, "이메일순으로 친구등록을 완료했습니다.")
+                                                adapter.notifyItemChanged(adapter.itemCount)
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    progressDialog.dismiss()
+                }
+            }
+    }
+    //툴바 우측 상단 프로필 이미지 불러오기
     fun toolbarProfileImage(context : Context, profileImage : CircleImageView){
         Log.d(TAG, "FirestoreUtil -> toolbarProfileImage함수 실행")
 
@@ -198,6 +212,7 @@ object FirestoreUtil {
     /**
      * ChatActivity
      * **/
+    //채팅방 접근에 필요한 도큐먼트 아이디 가져오기
     fun getChannelId(userInfo : UserModel, onComplete: (String) -> Unit){
         firestoreInstance
             .collection("유저")
@@ -209,8 +224,57 @@ object FirestoreUtil {
                 val channelId = it.get("channelId").toString()
                 onComplete(channelId)
             }
-
     }
+    fun fetchAllMessages(context : Context,
+                         chatChannelId : String,
+                         adapter : GroupAdapter<ViewHolder>,
+                         recyclerview : RecyclerView){
+        //기존에 카톡했던 내용을 시간순서대로 띄워줌
+        FirebaseFirestore.getInstance()
+            .collection("채팅방")
+            .document(chatChannelId)
+            .collection("채팅목록")
+            .orderBy("time", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null) return@addSnapshotListener
+                if(snapshot != null){
+                    for(dc in snapshot.documentChanges){//변한 것만 올림
+                        when(dc.type){
+                            DocumentChange.Type.ADDED -> {//변한 것중에서 추가된 것만 선별해서 올림.
+
+                                val chatLog = dc.document.toObject(ChatModel::class.java)
+
+                                //만약 내가 쓴글일 경우 오른쪽에 붙이고 상대방이 쓴 글이면 왼쪽에 붙임
+                                if(chatLog.fromId == FirebaseAuth.getInstance().uid.toString()){
+                                    adapter.add(chatMeToOther(context, chatLog))
+                                    adapter.notifyItemChanged(adapter.itemCount)//업데이트 된 내용만 애니메이션 작용
+                                }
+                                else{
+                                    adapter.add(chatOtherToMe(context, chatLog))
+                                    adapter.notifyItemChanged(adapter.itemCount)
+                                }
+                                recyclerview.scrollToPosition(adapter.itemCount-1)
+                            }
+                        }
+                    }
+                    //참고용
+                    //forEach문은 호출할 때마다 이전꺼까지 불러옴.(결국 1이라는 글 올리고 다음으로 2올리면 1,2 둘다 올라감.)
+//                    snapshot.forEach {
+//                        val chatLog = it.toObject(ChatModel::class.java)//객체로 바꾸려면 모델에 생성자가 있어야함.
+//                        if(chatLog.fromId == FirebaseAuth.getInstance().uid.toString()){
+//                            adapter.add(chatMeToOther(context, chatLog))
+//                            adapter.notifyItemChanged(adapter.itemCount)
+//                        }
+//                        else{
+//                            adapter.add(chatOtherToMe(context, chatLog))
+//                            adapter.notifyItemChanged(adapter.itemCount)
+//                        }
+//                        chats_recyclerview_chatActivity.scrollToPosition(adapter.itemCount-1)
+//                    }
+                }
+            }
+    }
+    //텍스트메시지를 파이어스토어에 저장(불러오기 X)
     fun sendTextMessage(chatChannelId : String, edittext : EditText, onComplete: () -> Unit){
         //메시지 보내질 경우 채팅방에 내가 쓴 글이 쌓임
         FirebaseFirestore.getInstance()

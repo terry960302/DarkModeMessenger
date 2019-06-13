@@ -26,6 +26,12 @@
                 android:scaleType="centerCrop"
                 android:layout_width="40dp"
                 android:layout_height="40dp"/>
+        <ImageView
+                android:src="@drawable/messenger_logo"
+                android:layout_marginLeft="15dp"
+                android:layout_gravity="left"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
     </androidx.appcompat.widget.Toolbar>
     <View
             android:id="@+id/shadow_mainActivity"

@@ -7,4 +7,5 @@ class UserModel(val uid : String,
                 val email : String,
                 val bio : String?,
                 val profileImagePath : String?):Serializable {
+    constructor(): this("", "", "", null, null)
 }

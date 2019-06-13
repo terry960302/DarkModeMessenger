@@ -6,4 +6,5 @@ class ChatModel(val fromId : String,
                 val desc : String?,
                 val imagePath : String?,
                 val time : Long) {
+    constructor():this("", null, null, System.currentTimeMillis())
 }

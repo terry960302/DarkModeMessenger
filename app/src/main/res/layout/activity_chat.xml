@@ -31,8 +31,7 @@
             android:background="@drawable/shadow"
             app:layout_constraintTop_toBottomOf="@+id/toolbar_chatActivity"
             app:layout_constraintEnd_toEndOf="@+id/toolbar_chatActivity"
-            app:layout_constraintStart_toStartOf="@+id/toolbar_chatActivity"
-    />
+            app:layout_constraintStart_toStartOf="@+id/toolbar_chatActivity"/>
 
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="0dp"
@@ -125,6 +124,5 @@
             app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
             android:id="@+id/makeShadow_linearLayout_chatActivity"
             app:layout_constraintStart_toStartOf="@+id/chats_recyclerview_chatActivity"
-            app:layout_constraintEnd_toEndOf="@+id/chats_recyclerview_chatActivity"
-    />
+            app:layout_constraintEnd_toEndOf="@+id/chats_recyclerview_chatActivity"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

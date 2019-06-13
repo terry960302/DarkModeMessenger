@@ -117,47 +117,7 @@ class ChatActivity : AppCompatActivity() {
 //        if(chats_recyclerview_chatActivity.adapter!!.itemCount > 0){
 //            chats_recyclerview_chatActivity.scrollToPosition(chats_recyclerview_chatActivity.adapter!!.itemCount -1)
 //        }
-
-
-        //기존에 카톡했던 내용을 시간순서대로 띄워줌
-        FirebaseFirestore.getInstance()
-            .collection("채팅방")
-            .document(chatChannelId)
-            .collection("채팅목록")
-            .orderBy("time", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, exception ->
-                if(exception != null) return@addSnapshotListener
-                if(snapshot != null){
-                    for(dc in snapshot.documentChanges){
-                        when(dc.type){
-                            DocumentChange.Type.ADDED -> {
-                                val id = dc.document["fromId"].toString()
-                                val desc = dc.document["desc"].toString()
-                                val imagePath = dc.document["imagePath"].toString()
-                                val time = dc.document["time"] as Long
-
-                                val chatLog = ChatModel(
-                                    fromId = id,
-                                    desc = desc,
-                                    imagePath = imagePath,
-                                    time = time)
-
-
-                                //만약 내가 쓴글일 경우 오른쪽에 붙이고 상대방이 쓴 글이면 왼쪽에 붙임
-                                if(id == FirebaseAuth.getInstance().uid.toString()){
-                                    adapter.add(chatMeToOther(context, chatLog))
-                                    adapter.notifyItemChanged(adapter.itemCount)//업데이트 된 내용만 애니메이션 작용
-                                }
-                                else{
-                                    adapter.add(chatOtherToMe(context, chatLog))
-                                    adapter.notifyItemChanged(adapter.itemCount)
-                                }
-                                chats_recyclerview_chatActivity.scrollToPosition(adapter.itemCount-1)
-                            }
-                        }
-                    }
-                }
-            }
+        FirestoreUtil.fetchAllMessages(this, chatChannelId, adapter, chats_recyclerview_chatActivity)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -191,12 +151,7 @@ class ChatActivity : AppCompatActivity() {
                     circularProgressDrawable.backgroundColor = R.color.colorAccent
                     circularProgressDrawable.start()
 
-//                    StorageUtil.uploadChatImage(byteArray, chatChannelId) {
-//                        GlideApp.with(this)
-//                            .load(bmp)
-//                            .placeholder(circularProgressDrawable)
-//                            .into(chatLog_imageview_chatActivity)
-//                    }
+                    //받은 크롭 uri를 가지고 채팅로그에 붙여줌.
                     val chatImageStorageRef = FirebaseStorage.getInstance()
                         .reference.child("FirebaseAuth.getInstance().uid.toString()/${UUID.nameUUIDFromBytes(byteArray)}")
                     chatImageStorageRef.putBytes(byteArray).addOnSuccessListener {

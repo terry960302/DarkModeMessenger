@@ -18,8 +18,8 @@
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/chatTime_textview_left"
             app:layout_constraintVertical_bias="1.0" android:id="@+id/cardView2"
-            app:layout_constraintStart_toEndOf="@+id/yourImage_imageview_message" android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp">
+            android:layout_marginStart="16dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="16dp">
 
         <TextView
                 android:text="여긴 내용이 들어갑니다."
@@ -37,23 +37,15 @@
                 android:scaleType="centerCrop"
                 android:id="@+id/chatLog_imageview_left"/>
     </androidx.cardview.widget.CardView>
-    <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/yourImage_imageview_message"
-            android:background="@drawable/users"
-            android:scaleType="centerCrop"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:layout_constraintBottom_toBottomOf="@+id/cardView2" app:layout_constraintTop_toTopOf="@+id/cardView2"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"/>
     <TextView
             android:text="2019년 6월 6일 2시 30분 45초"
             android:textColor="#fff"
             android:textSize="7sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/chatTime_textview_left" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp" app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/chatTime_textview_left" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp" app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="8dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
