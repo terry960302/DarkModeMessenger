@@ -4,12 +4,14 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.request.RequestOptions
 import com.example.taewanmessenger.Utils.StorageUtil
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.android.gms.auth.api.signin.internal.Storage
@@ -29,11 +31,22 @@ class MyPageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_page)
+
         setSupportActionBar(toolbar)
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        supportActionBar?.title = FirebaseAuth.getInstance().currentUser?.displayName
+
+        //프로필 이미지 가져오기
+        val imagePath = intent.getStringExtra("profileImagePath")
+        if(imagePath != null){
+            GlideApp.with(this)
+                .load(imagePath)
+                .into(centerProfileImage_imageview_myPageActivity)
+            GlideApp.with(this)
+                .load(imagePath)
+                .into(backgroundProfileImage_imaegview_myPageActivity)
         }
+
+
         profileImage_app_bar_mypageActivity.setOnClickListener {
             val list = arrayOf("앨범에서 사진 선택", "기본 이미지")
             AlertDialog.Builder(this@MyPageActivity)
@@ -71,7 +84,9 @@ class MyPageActivity : AppCompatActivity() {
         //크롭시작
         if(requestCode == UCrop.REQUEST_CROP && resultCode == Activity.RESULT_OK){
             val croppedUri = UCrop.getOutput(data!!)
-            val progressDialog = indeterminateProgressDialog("로딩중")
+            val progressDialog = indeterminateProgressDialog("프로필 사진 변경중")
+            progressDialog.setCancelable(false)
+
             if(croppedUri != null){
                 val bmp : Bitmap
                 try {
@@ -83,6 +98,9 @@ class MyPageActivity : AppCompatActivity() {
                     GlideApp.with(this)
                         .load(bmp)
                         .into(centerProfileImage_imageview_myPageActivity)
+                    GlideApp.with(this)
+                        .load(bmp)
+                        .into(backgroundProfileImage_imaegview_myPageActivity)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }

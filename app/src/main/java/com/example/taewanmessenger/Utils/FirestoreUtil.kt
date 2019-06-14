@@ -17,11 +17,13 @@ import com.example.taewanmessenger.Recyclerview.chatOtherToMe
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.Section
 import com.xwray.groupie.ViewHolder
 import de.hdodenhof.circleimageview.CircleImageView
 
@@ -59,7 +61,8 @@ object FirestoreUtil {
         }
     }
     //구글로 가입한 유저 업로드
-    fun firstGoogleLoginUser(account : GoogleSignInAccount, onComplete: () -> Unit){
+    fun firstGoogleLoginUser(account : GoogleSignInAccount,
+                             onComplete: () -> Unit){
         userDocRef.get().addOnSuccessListener {
             if(!it.exists()){
                 val newUser = UserModel(
@@ -76,6 +79,29 @@ object FirestoreUtil {
             }
             else{
                 Log.d(TAG, "파이어스토어에 구글로 가입한 유저 정보가 업로드 실패")
+                onComplete()
+            }
+        }
+    }
+    //페이스북으로 가입한 유저
+    fun firstFacebookLoginUser(user : FirebaseUser?, onComplete: () -> Unit){
+        userDocRef.get().addOnSuccessListener {
+            if(!it.exists()){
+                if(user == null) Log.d(TAG, "파이어스토어 페이스북에서 받은 유저 정보가 없습니다.")
+                val newUser = UserModel(
+                    uid = user?.uid.toString(),
+                    name = user?.displayName.toString(),
+                    email = user?.email.toString(),
+                    profileImagePath = user?.photoUrl.toString(),
+                    bio = null
+                )
+                userDocRef.set(newUser).addOnCompleteListener {
+                    Log.d(TAG, "파이어스토어 페이스북 DB업로드 성공")
+                    onComplete()
+                }
+            }
+            else{
+                Log.d(TAG, "파이어스토어 페이스북 DB업로드 실패")
                 onComplete()
             }
         }
@@ -153,7 +179,9 @@ object FirestoreUtil {
      * MainActivity
      * **/
     //내 친구들 다 불러오기
-    fun fetchMyFriends(context : Context, adapter : GroupAdapter<ViewHolder>, progressDialog : ProgressDialog){
+    fun fetchMyFriends(context : Context,
+                       adapter : GroupAdapter<ViewHolder>,
+                       progressDialog : ProgressDialog){
         FirebaseFirestore.getInstance()
             .collection("유저")
             .document(FirebaseAuth.getInstance().uid.toString())
@@ -161,53 +189,106 @@ object FirestoreUtil {
             .addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 if(firebaseFirestoreException != null) return@addSnapshotListener
                 if(querySnapshot != null){
-                    for(dc in querySnapshot.documentChanges){
-                        when(dc.type){
-                            DocumentChange.Type.ADDED ->{
 
-                                val otherUid = dc.document["uid"].toString()
+                    adapter.clear()//여기서 친구목록 미리 깔끔히 지워주고(중복으로 아이템 붙는거 방지)
 
-                                FirebaseFirestore.getInstance()
-                                    .collection("유저")
-                                    .whereEqualTo("uid", otherUid)
-                                    .orderBy("email", Query.Direction.DESCENDING)
-                                    .addSnapshotListener { snapshot, exception ->
-                                        if(exception != null) return@addSnapshotListener
-                                        if(snapshot != null){
-                                            snapshot.forEach {
-                                                val otherUser = it.toObject(UserModel::class.java)
-                                                adapter.add(MainActivity_FriendsItem(context, otherUser))
-                                                Log.d(TAG, "이메일순으로 친구등록을 완료했습니다.")
-                                                adapter.notifyItemChanged(adapter.itemCount)
-                                            }
-                                        }
+                    for(dc in querySnapshot.documents){
+
+                        val friendUid = dc["uid"].toString()
+
+                        FirebaseFirestore.getInstance()
+                            .collection("유저")
+                            .whereEqualTo("uid", friendUid)
+                            .orderBy("name")
+                            .addSnapshotListener { snapshot, exception ->
+                                if(exception != null) return@addSnapshotListener
+                                if(snapshot != null){
+                                    snapshot.forEach {
+                                        val friend = it.toObject(UserModel::class.java)
+                                        adapter.add(MainActivity_FriendsItem(context, friend))
                                     }
+                                }
                             }
-                        }
                     }
+                    adapter.notifyDataSetChanged()//친구 추가나 삭제가 있을 경우 새로고침해줌.
+
+//                    for(dc in querySnapshot.documentChanges){
+//                        when(dc.type){
+//                            //친구가 추가되었을 경우
+//                            DocumentChange.Type.ADDED ->{
+//
+//                                val otherUid = dc.document["uid"].toString()
+//
+//                                FirebaseFirestore.getInstance()
+//                                    .collection("유저")
+//                                    .whereEqualTo("uid", otherUid)
+//                                    .orderBy("name")
+//                                    .addSnapshotListener { snapshot, exception ->
+//                                        if(exception != null) return@addSnapshotListener
+//                                        if(snapshot != null){
+//                                            snapshot.forEach {
+//                                                val otherUser = it.toObject(UserModel::class.java)
+//                                                adapter.add(MainActivity_FriendsItem(context, otherUser))
+//                                                Log.d(TAG, "이메일순으로 친구등록을 완료했습니다.")
+//                                                adapter.notifyItemChanged(adapter.itemCount)
+//                                            }
+//                                        }
+//                                    }
+//                            }
+//                            //친구 삭제된 요소에 대해
+//                            DocumentChange.Type.REMOVED -> {
+//                                val removedUser = dc.document.toObject(UserModel::class.java)//삭제된 사람의 정보
+//                                adapter.notifyDataSetChanged()
+//                                adapter.notifyDataSetChanged()
+//                                adapter.notifyDataSetChanged()
+//                                adapter.notifyDataSetChanged()
+//                                adapter.notifyDataSetChanged()
+////                                val otherUid = dc.document["uid"].toString()
+////                                FirebaseFirestore.getInstance()
+////                                    .collection("유저")
+////                                    .whereEqualTo("uid", otherUid)
+////                                    .orderBy("name", Query.Direction.DESCENDING)
+////                                    .addSnapshotListener { snapshot, exception ->
+////                                        if(exception != null) return@addSnapshotListener
+////                                        if(snapshot != null){
+////                                            snapshot.forEach {
+////                                                val otherUser = it.toObject(UserModel::class.java)
+////                                                adapter.notifyItemRemoved(dc.newIndex)
+////                                                Log.d(TAG, "${otherUid}친구 삭제를 완료했습니다.")
+//////                                                adapter.notifyItemChanged(adapter.itemCount)
+////                                            }
+////                                        }
+////                                    }
+//
+//                            }
+//                        }
+//                    }
                     progressDialog.dismiss()
                 }
             }
     }
     //툴바 우측 상단 프로필 이미지 불러오기
-    fun toolbarProfileImage(context : Context, profileImage : CircleImageView){
+    fun toolbarProfileImage(context : Context,
+                            profileImage : CircleImageView,
+                            onComplete: (String) -> Unit){
         Log.d(TAG, "FirestoreUtil -> toolbarProfileImage함수 실행")
 
         FirebaseFirestore.getInstance().collection("유저")
             .document(auth.uid.toString())
-            .get()
-            .addOnCompleteListener {
-                if(it.isSuccessful){
-                    val result = it.result
-                    val image = result?.get("profileImagePath")
-                    if(image != null){
+                //스냅샷이 속도가 훨씬 빠름
+            .addSnapshotListener { snapshot, firestoreException ->
+                if(firestoreException != null) return@addSnapshotListener
+                if(snapshot != null){
+                    val imagePath = snapshot["profileImagePath"].toString()
+                    if(imagePath != null){
                         GlideApp.with(context)
-                            .load(image)
+                            .load(imagePath)
                             .into(profileImage)
+                        onComplete(imagePath)
                     }
-
                 }
             }
+
     }
     /**
      * ChatActivity
@@ -228,7 +309,9 @@ object FirestoreUtil {
     fun fetchAllMessages(context : Context,
                          chatChannelId : String,
                          adapter : GroupAdapter<ViewHolder>,
-                         recyclerview : RecyclerView){
+                         recyclerview : RecyclerView,
+                         progressBar: ProgressBar){
+
         //기존에 카톡했던 내용을 시간순서대로 띄워줌
         FirebaseFirestore.getInstance()
             .collection("채팅방")
@@ -254,8 +337,13 @@ object FirestoreUtil {
                                     adapter.notifyItemChanged(adapter.itemCount)
                                 }
                                 recyclerview.scrollToPosition(adapter.itemCount-1)
+                                progressBar.visibility = View.GONE
                             }
                         }
+                    }
+                    //채팅한 적이 없으면 로딩바 없애줌.
+                    if(adapter.itemCount == 0 ){
+                        progressBar.visibility = View.GONE
                     }
                     //참고용
                     //forEach문은 호출할 때마다 이전꺼까지 불러옴.(결국 1이라는 글 올리고 다음으로 2올리면 1,2 둘다 올라감.)

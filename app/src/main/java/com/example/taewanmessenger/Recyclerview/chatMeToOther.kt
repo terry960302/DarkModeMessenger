@@ -1,12 +1,18 @@
 package com.example.taewanmessenger.Recyclerview
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.Window
 import android.view.animation.AnimationUtils
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.view.ViewCompat
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.R
 import com.example.taewanmessenger.etc.GlideApp
+import com.example.taewanmessenger.etc.ZoomActivity
 import com.example.taewanmessenger.etc.ZoomDialog
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
@@ -42,9 +48,16 @@ class chatMeToOther(val context : Context,
         viewHolder.itemView.setOnClickListener {
             //클릭했을 때 이미지일 경우만 반응
             if(chatModel.imagePath != null && chatModel.desc == ""){
-                dialog = ZoomDialog(it.context, chatModel.imagePath)
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                dialog.show()
+//                dialog = ZoomDialog(it.context, chatModel.imagePath)
+//                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+//                dialog.show()
+                val intent = Intent(context, ZoomActivity::class.java)
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        context as Activity,
+                        viewHolder.itemView.chatLog_imageview_chatActivity,
+                        ViewCompat.getTransitionName(viewHolder.itemView.chatLog_imageview_chatActivity)!!)
+                intent.putExtra("chatImagePath", chatModel.imagePath)
+                context.startActivity(intent, options.toBundle())
             }
         }
 

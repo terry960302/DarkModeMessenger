@@ -78,4 +78,7 @@ dependencies {
 
     //이미지 크롭
     implementation 'com.github.yalantis:ucrop:2.2.3'
+
+    //페이스북
+    implementation 'com.facebook.android:facebook-login:[5,6)'
 }

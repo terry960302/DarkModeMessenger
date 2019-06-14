@@ -25,7 +25,8 @@
                 android:src="@drawable/users"
                 android:scaleType="centerCrop"
                 android:layout_width="40dp"
-                android:layout_height="40dp"/>
+                android:layout_height="40dp"
+                android:transitionName="profile_transition"/>
         <ImageView
                 android:src="@drawable/messenger_logo"
                 android:layout_marginLeft="15dp"
@@ -41,8 +42,8 @@
             app:layout_constraintTop_toBottomOf="@+id/toolbar_mainActivity"/>
 
     <com.github.clans.fab.FloatingActionMenu
-            app:menu_colorNormal="#EDBB99"
-            app:menu_colorPressed="#FAE5D3"
+            app:fab_colorNormal="#EE9B4D"
+            app:fab_colorPressed="#EDBB99"
             app:menu_fab_size="normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,14 +52,15 @@
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
             app:layout_constraintBottom_toBottomOf="@+id/friendsList_recyclerview_mainActivity"
-            android:layout_marginBottom="16dp" android:id="@+id/floatingActionMenu2">
+            android:layout_marginBottom="16dp"
+            android:id="@+id/floatingActionMenu">
 
         <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/search_fab_mainActivity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:fab_colorNormal="#EDBB99"
-                app:fab_colorPressed="#FAE5D3"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="#EDBB99"
                 android:src="@drawable/ic_search_black_24dp"
                 fab:fab_size="mini"
                 fab:fab_label="친구 찾기"/>
@@ -67,8 +69,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_person_black_24dp"
-                app:fab_colorNormal="#EDBB99"
-                app:fab_colorPressed="#FAE5D3"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="#EDBB99"
                 fab:fab_size="mini"
                 fab:fab_label="마이페이지"/>
         <com.github.clans.fab.FloatingActionButton
@@ -76,8 +78,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_mood_bad_black_24dp"
-                app:fab_colorNormal="#EDBB99"
-                app:fab_colorPressed="#FAE5D3"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="#EDBB99"
                 fab:fab_size="mini"
                 fab:fab_label="로그아웃"/>
 

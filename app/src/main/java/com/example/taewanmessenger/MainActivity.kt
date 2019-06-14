@@ -1,13 +1,18 @@
 package com.example.taewanmessenger
 
 import android.app.ProgressDialog
+import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.ViewCompat
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.transition.Fade
 import com.example.taewanmessenger.Recyclerview.MainActivity_FriendsItem
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.Utils.FirestoreUtil
@@ -28,10 +33,12 @@ class MainActivity : AppCompatActivity() {
     private val adapter = GroupAdapter<ViewHolder>()
     private val TAG = "TAGMainActivity"
     lateinit var progressDialog : ProgressDialog
+    lateinit var profileImagePath : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
 
         /**
          * 툴바설정
@@ -41,11 +48,23 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.title = "채팅앱"
 
         //툴바 내 프로필 사진띄우기
-        FirestoreUtil.toolbarProfileImage(this, myProfile_imageview_mainActivity)
+        FirestoreUtil.toolbarProfileImage(this, myProfile_imageview_mainActivity){
+            profileImagePath = it
+        }
 
-        //툴바 프로필 이미지 누르면 이동
+        //툴바 우측 프로필 이미지 누르면 이동
         myProfile_imageview_mainActivity.setOnClickListener {
-            startActivity(intentFor<MyPageActivity>().newTask())
+
+            val intent = Intent(this@MainActivity, MyPageActivity::class.java)
+            //shared element transition화면 간 이동시 공유된 요소에서 일어나는 애니메이션 설정
+            val options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(
+                    this@MainActivity,
+                    myProfile_imageview_mainActivity,
+                    ViewCompat.getTransitionName(myProfile_imageview_mainActivity)!!)
+            intent.putExtra("profileImagePath", profileImagePath)
+            startActivity(intent, options.toBundle())
+
         }
 
 
@@ -72,7 +91,8 @@ class MainActivity : AppCompatActivity() {
 
     fun initRecyclerview(){
     //리사이클러뷰에 내 친구들 띄우기
-        progressDialog = indeterminateProgressDialog("친구를 불러오고 있습니다...")
+        progressDialog = indeterminateProgressDialog("친구를 불러오는 중...")
+        progressDialog.setCancelable(false)
         FirestoreUtil.fetchMyFriends(this, adapter, progressDialog)
 
         //리사이클러뷰 설정
@@ -92,5 +112,6 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         progressDialog.dismiss()
+        floatingActionMenu.close(false)
     }
 }

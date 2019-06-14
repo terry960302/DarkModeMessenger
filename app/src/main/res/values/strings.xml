@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">TaewanMessenger</string>
     <string name="title_activity_my_page">MyPageActivity</string>
+    <!--페이스북 로그인용 2개-->
+    <string name="facebook_app_id">484383088965391</string>
+    <string name="fb_login_protocol_scheme">fb484383088965391</string>
+
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

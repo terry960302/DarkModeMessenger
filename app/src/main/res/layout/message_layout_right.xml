@@ -33,6 +33,7 @@
                 android:layout_height="200dp"
                 android:layout_margin="10dp"
                 android:visibility="gone"
+                android:transitionName="chatImage_transition"
                 android:scaleType="centerCrop"
                 android:id="@+id/chatLog_imageview_chatActivity"/>
     </androidx.cardview.widget.CardView>

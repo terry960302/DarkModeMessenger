@@ -8,22 +8,18 @@ import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.animation.AlphaAnimation
-import android.widget.RelativeLayout
 import android.widget.Toast
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.R
-import com.example.taewanmessenger.SearchActivity
-import com.example.taewanmessenger.Utils.FirestoreUtil
 import com.example.taewanmessenger.etc.Dialog_in_SearchItemClicked
 import com.example.taewanmessenger.etc.GlideApp
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_main_friends_item_in_search.view.*
-import java.util.*
-import javax.security.auth.callback.Callback
+import kotlinx.android.synthetic.main.profile_dialog_layout.view.*
+
 
 class SearchActivity_FriendsItem(val context: Context,
                                  val usermodel : UserModel) : Item<ViewHolder>(){
@@ -77,7 +73,7 @@ class SearchActivity_FriendsItem(val context: Context,
         dialog.show()
     }
     private val addFriendListener = View.OnClickListener{
-
+        it.addFriend_button_searchActivity.startAnimation()
         FirebaseFirestore.getInstance().collection("유저")
             .document(FirebaseAuth.getInstance().uid.toString())
             .collection("친구목록")

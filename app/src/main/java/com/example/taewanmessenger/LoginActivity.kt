@@ -6,16 +6,22 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.example.taewanmessenger.Utils.FirestoreUtil
+import com.facebook.*
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.ErrorCodes
 import com.firebase.ui.auth.IdpResponse
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.*
+import org.json.JSONObject
+import java.util.*
 
 class LoginActivity : AppCompatActivity() {
 
@@ -27,7 +33,8 @@ class LoginActivity : AppCompatActivity() {
             .build())
     private val RC_EMAIL_SIGN_IN = 1001
     private val RC_GOOGLE_SIGN_IN = 1002
-
+    var callbackManager : CallbackManager? = null
+    private val auth : FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +45,8 @@ class LoginActivity : AppCompatActivity() {
                 AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(providers)
+                    .setLogo(R.drawable.messenger_logo)
+                    .setTheme(R.style.otherTheme)
                     .build(),
                 RC_EMAIL_SIGN_IN
             )
@@ -52,8 +61,60 @@ class LoginActivity : AppCompatActivity() {
             startActivityForResult(signInIntent, RC_GOOGLE_SIGN_IN)
         }
         facebookLogin_btn_login.setOnClickListener {
-            toast("아직 설정안함")
+            val accessToken = AccessToken.getCurrentAccessToken()
+            val isLoggedIn = accessToken != null && !accessToken.isExpired
+            LoginManager.getInstance().logInWithReadPermissions(this@LoginActivity,
+                Arrays.asList("email", "public_profile"))
+            facebookLoginFunc()
         }
+    }
+    private fun facebookLoginFunc() {
+        callbackManager = CallbackManager.Factory.create()
+        LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            override fun onSuccess(result: LoginResult?) {
+//                requestMe(result!!.getAccessToken());
+                Log.d(TAG, "페이스북 로그인 성공")
+                handleFacebookAccessToken(result!!.accessToken)
+            }
+
+
+            override fun onCancel() {
+                Log.d(TAG, "페이스북 로그인 실패")
+            }
+
+            override fun onError(error: FacebookException?) {
+                Log.d(TAG, "페이스북 로그인 에러  = ${error?.message}")
+            }
+            private fun handleFacebookAccessToken(token : AccessToken) {
+                Log.d(TAG, "handleFacebookAccessToken : $token")
+
+                val credential = FacebookAuthProvider.getCredential(token.token)
+                auth.signInWithCredential(credential).addOnCompleteListener {
+                    if(it.isSuccessful){
+                        Log.d(TAG, "signInWithCredential이 성공적")
+                        val user = auth.currentUser
+                        FirestoreUtil.firstFacebookLoginUser(user){
+                            startActivity(intentFor<MainActivity>().newTask().clearTask())
+                        }
+                    }
+                    else{
+                        Log.w(TAG, "signInWithCredential이 실패 = ", it.exception)
+                        toast("페이스북 인증에 실패했습니다.")
+                    }
+                }
+            }
+            fun requestMe(token : AccessToken){
+                val graphRequest = GraphRequest.newMeRequest(token, object : GraphRequest.GraphJSONObjectCallback{
+                    override fun onCompleted(`object`: JSONObject?, response: GraphResponse?) {
+                        Log.d(TAG, "토큰요청 성공의 결과물 = ${`object`.toString()}")
+                    }
+                })
+                val parameters = Bundle()
+                parameters.putString("fields",  "id,name,email,gender,birthday")
+                graphRequest.setParameters(parameters);
+                graphRequest.executeAsync();
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -64,6 +125,7 @@ class LoginActivity : AppCompatActivity() {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == Activity.RESULT_OK) {
                 val progressDialog = indeterminateProgressDialog("회원정보 확인중...")
+                progressDialog.setCancelable(false)
                 FirestoreUtil.firstEmailLoginUser {
                     startActivity(intentFor<MainActivity>().newTask().clearTask())
                     progressDialog.dismiss()
@@ -90,6 +152,9 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
                             Log.d(TAG, "계정정보 받은 후 signInWithCredential:성공")
+                            val progressDialog = indeterminateProgressDialog("로딩중...")
+                            progressDialog.setCancelable(false)
+
                             FirestoreUtil.firstGoogleLoginUser(account!!) {
                                 startActivity(intentFor<MainActivity>().newTask().clearTask())
                                 progressDialog.dismiss()
@@ -103,5 +168,7 @@ class LoginActivity : AppCompatActivity() {
                 Log.w(TAG, "onActivityResult에서 계정 받는데 실패사유 = ", e)
             }
         }
+        //페이스북 로그인
+        callbackManager?.onActivityResult(requestCode, resultCode, data)
     }
 }

@@ -3,7 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="300dp"
-        android:layout_height="350dp"
+        android:layout_height="380dp"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:background="#00000000">
     <androidx.cardview.widget.CardView
@@ -68,8 +68,10 @@
                         android:layout_margin="10dp"
                         android:text="test1234@gmail.com"/>
             </androidx.cardview.widget.CardView>
-            <Button
+            <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
                     android:text="친구 추가"
+                    android:textColor="#fff"
+                    app:spinning_bar_color="#fff"
                     android:layout_width="0dp"
                     android:layout_height="30dp"
                     android:background="@drawable/button_style"

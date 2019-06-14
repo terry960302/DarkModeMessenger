@@ -15,7 +15,8 @@ object StorageUtil {
     fun uploadProfileImage(byteArray: ByteArray,
                            progressDialog: ProgressDialog
     ) {
-        val profileRef = firebaseStorageInstance.reference.child("프로필사진/${UUID.nameUUIDFromBytes(byteArray)}")
+        val profileRef = firebaseStorageInstance.
+            reference.child("프로필사진/${UUID.nameUUIDFromBytes(byteArray)}")
         profileRef.putBytes(byteArray).addOnSuccessListener {
             profileRef.downloadUrl.addOnSuccessListener {
                 //여기서 받은 파이어스토리지 내 uri를 이제 디비에 저장한 후 액티비티를 켤 때마다 프로필이미지를 불러온다.

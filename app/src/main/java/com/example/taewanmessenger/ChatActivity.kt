@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
+import android.widget.ProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
@@ -78,7 +79,7 @@ class ChatActivity : AppCompatActivity() {
             /**
              * 리사이클러뷰 설정
              * **/
-            initRecyclerview(this, adapter, chatChannelId)
+            initRecyclerview(adapter, chatChannelId, progress_bar_chatActivity)
             /**
              * 채팅보내기 설정
              * **/
@@ -107,17 +108,19 @@ class ChatActivity : AppCompatActivity() {
     /**
      * 여러 메서드들
      * **/
-    fun initRecyclerview(context : Context,
-                         adapter : GroupAdapter<ViewHolder>,
-                         chatChannelId : String){
+    fun initRecyclerview(adapter : GroupAdapter<ViewHolder>,
+                         chatChannelId : String,
+                         progressbar : ProgressBar){
         //리사이클러뷰 기본 설정
         val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         chats_recyclerview_chatActivity.layoutManager = lm
         chats_recyclerview_chatActivity.adapter = adapter
-//        if(chats_recyclerview_chatActivity.adapter!!.itemCount > 0){
-//            chats_recyclerview_chatActivity.scrollToPosition(chats_recyclerview_chatActivity.adapter!!.itemCount -1)
-//        }
-        FirestoreUtil.fetchAllMessages(this, chatChannelId, adapter, chats_recyclerview_chatActivity)
+
+        FirestoreUtil.fetchAllMessages(this,
+            chatChannelId,
+            adapter,
+            chats_recyclerview_chatActivity,
+            progressbar)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -153,7 +156,7 @@ class ChatActivity : AppCompatActivity() {
 
                     //받은 크롭 uri를 가지고 채팅로그에 붙여줌.
                     val chatImageStorageRef = FirebaseStorage.getInstance()
-                        .reference.child("FirebaseAuth.getInstance().uid.toString()/${UUID.nameUUIDFromBytes(byteArray)}")
+                        .reference.child("${FirebaseAuth.getInstance().uid.toString()}/${UUID.nameUUIDFromBytes(byteArray)}")
                     chatImageStorageRef.putBytes(byteArray).addOnSuccessListener {
                         Log.d(TAG, "채팅 이미지를 스토리지에 업로드했습니다.")
                         chatImageStorageRef.downloadUrl.addOnSuccessListener {

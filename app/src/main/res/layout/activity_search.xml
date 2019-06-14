@@ -17,17 +17,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintHorizontal_bias="1.0">
-        <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/myProfile_imageview_searchActivity"
-                android:src="@drawable/users"
-                android:elevation="10dp"
-                android:layout_marginRight="15dp"
-                android:scaleType="centerCrop"
-                android:layout_gravity="right"
-                android:layout_width="40dp"
-                android:layout_height="40dp"/>
-    </androidx.appcompat.widget.Toolbar>
+            app:layout_constraintHorizontal_bias="0.0"/>
 
     <View
             android:id="@+id/toolbar_shadow"

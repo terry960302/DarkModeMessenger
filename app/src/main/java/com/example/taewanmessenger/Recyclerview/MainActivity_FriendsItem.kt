@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.animation.AlphaAnimation
 import com.example.taewanmessenger.ChatActivity
+import com.example.taewanmessenger.MainActivity
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.etc.GlideApp
 import com.example.taewanmessenger.R
@@ -52,8 +53,6 @@ class MainActivity_FriendsItem(val context : Context,
         /**
          * 친구골라서 아이템 클릭 -> 채팅방 DB생성 -> 유저 정보를 다음 창인 ChatActivity로 보냄.
          * **/
-
-
         //아이템 짧게 클릭
         viewHolder.itemView.setOnClickListener {
 
@@ -99,27 +98,6 @@ class MainActivity_FriendsItem(val context : Context,
                 chatChannelId = channelRef.id
                 // -> 이렇게 되면 하나의 채팅방을 둘이서 공유하는 방식이 됨.
             }
-            viewHolder.itemView.setOnLongClickListener {
-                AlertDialog.Builder(context)
-                    .setMessage("친구를 삭제하시겠습니까?")
-                    .setCancelable(true)
-                    .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog, which ->
-                        FirebaseFirestore.getInstance()
-                            .collection("유저")
-                            .document(FirebaseAuth.getInstance().uid.toString())
-                            .collection("친구목록")
-                            .document(user.uid)
-                            .delete().addOnSuccessListener {
-                                Log.d(TAG, "${user.name}님이 친구목록에서 삭제되었습니다.")
-                            }
-                    })
-                    .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
-                        dialog.cancel()
-                    })
-                return@setOnLongClickListener true
-
-            }
-
 
             //다음 창 이동 + 유저 데이터(내정보 + 친구 정보 + 채팅방 id) 보내기
             val intent = Intent(context, ChatActivity::class.java)
@@ -128,30 +106,28 @@ class MainActivity_FriendsItem(val context : Context,
             intent.putExtras(bundle)
             context.startActivity(intent)
             Log.d(TAG, "MainActivity_FriendsItem -> ChatActivity로 이동합니다.")
-//                //내 정보 가져오기
-//            FirebaseFirestore.getInstance()
-//                .collection("유저")
-//                .document(auth.uid.toString())
-//                .get()
-//                .addOnCompleteListener {
-//                    if (it.isSuccessful) {
-//                        val result = it.result
-//
-//                        val uid = result?.get("uid").toString()
-//                        val name = result?.get("name").toString()
-//                        val email = result?.get("email").toString()
-//                        val bio = result?.get("bio").toString()
-//                        val profileImagePath = result?.get("profileImagePath").toString()
-//
-//                        myInfo = UserModel(uid, name, email, bio, profileImagePath)
-//
-//                        bundle.putSerializable("myInfo", myInfo)
-//                        intent.putExtras(bundle)
-//                        context.startActivity(intent)
-//
-//                        Log.d(TAG, "MainActivity_FriendsItem -> ChatActivity로 이동합니다.")
-//                    }
-//                }
+        }
+
+
+        viewHolder.itemView.setOnLongClickListener {
+            AlertDialog.Builder(context)
+                .setMessage("친구를 삭제하시겠습니까?")
+                .setCancelable(true)
+                .setPositiveButton("삭제", DialogInterface.OnClickListener { dialog, which ->
+                    FirebaseFirestore.getInstance()
+                        .collection("유저")
+                        .document(FirebaseAuth.getInstance().uid.toString())
+                        .collection("친구목록")
+                        .document(user.uid)
+                        .delete().addOnSuccessListener {
+                            Log.d(TAG, "${user.name}님이 친구목록에서 삭제되었습니다.")
+                        }
+                })
+                .setNegativeButton("취소", DialogInterface.OnClickListener { dialog, which ->
+                    dialog.cancel()
+                })
+                .show()
+            return@setOnLongClickListener true
         }
     }
 }
