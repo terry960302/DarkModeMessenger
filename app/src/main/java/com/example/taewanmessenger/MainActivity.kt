@@ -16,6 +16,7 @@ import androidx.transition.Fade
 import com.example.taewanmessenger.Recyclerview.MainActivity_FriendsItem
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.Utils.FirestoreUtil
+import com.example.taewanmessenger.etc.GlideApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -64,7 +65,6 @@ class MainActivity : AppCompatActivity() {
                     ViewCompat.getTransitionName(myProfile_imageview_mainActivity)!!)
             intent.putExtra("profileImagePath", profileImagePath)
             startActivity(intent, options.toBundle())
-
         }
 
 
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
     //앱 시작시 작동 메서드
     override fun onStart() {
         super.onStart()
-        if(FirebaseAuth.getInstance().uid == null){
+        if(FirebaseAuth.getInstance().currentUser?.uid == null){
             startActivity(intentFor<LoginActivity>().newTask().clearTask())
         }
     }
@@ -113,5 +113,9 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         progressDialog.dismiss()
         floatingActionMenu.close(false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

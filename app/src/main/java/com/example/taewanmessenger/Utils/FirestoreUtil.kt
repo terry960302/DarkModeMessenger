@@ -1,6 +1,7 @@
 package com.example.taewanmessenger.Utils
 
 import android.R
+import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.net.Uri
@@ -46,8 +47,8 @@ object FirestoreUtil {
                     uid = auth.uid.toString(),
                     name = auth.currentUser?.displayName?: "",//null값일 경우 ""로 처리
                     email = auth.currentUser?.email?: "",
-                    bio = null,
-                    profileImagePath = null
+                    bio = "",
+                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7"
                 )
                 userDocRef.set(newUser).addOnCompleteListener {
                     Log.d(TAG, "파이어스토어에 이메일로 가입한 유저 정보가 업로드 완료했습니다.")
@@ -55,7 +56,7 @@ object FirestoreUtil {
                 }
             }
             else{
-                Log.d(TAG, "파이어스토어에 이메일로 가입한 유저 정보가 업로드 실패")
+                Log.d(TAG, "파이어스토어에 이미 이 이메일로 가입한 정보가 있습니다.")
                 onComplete()
             }
         }
@@ -69,8 +70,8 @@ object FirestoreUtil {
                     uid = auth.uid.toString(),
                     name = account?.displayName?:"",
                     email = account?.email?:"",
-                    bio = null,
-                    profileImagePath = null
+                    bio = "",
+                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7"
                 )
                 userDocRef.set(newUser).addOnCompleteListener {
                     Log.d(TAG, "파이어스토어에 구글로 가입한 유저 정보가 업로드 완료했습니다.")
@@ -78,7 +79,7 @@ object FirestoreUtil {
                 }
             }
             else{
-                Log.d(TAG, "파이어스토어에 구글로 가입한 유저 정보가 업로드 실패")
+                Log.d(TAG, "파이어스토어에 이미 이 구글계정으로 가입한 정보가 있습니다.")
                 onComplete()
             }
         }
@@ -92,8 +93,8 @@ object FirestoreUtil {
                     uid = user?.uid.toString(),
                     name = user?.displayName.toString(),
                     email = user?.email.toString(),
-                    profileImagePath = user?.photoUrl.toString(),
-                    bio = null
+                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7",
+                    bio = ""
                 )
                 userDocRef.set(newUser).addOnCompleteListener {
                     Log.d(TAG, "파이어스토어 페이스북 DB업로드 성공")
@@ -101,7 +102,7 @@ object FirestoreUtil {
                 }
             }
             else{
-                Log.d(TAG, "파이어스토어 페이스북 DB업로드 실패")
+                Log.d(TAG, "파이어스토어에 이 페이스북 계정으로 가입한 정보가 있습니다.")
                 onComplete()
             }
         }
@@ -280,11 +281,14 @@ object FirestoreUtil {
                 if(firestoreException != null) return@addSnapshotListener
                 if(snapshot != null){
                     val imagePath = snapshot["profileImagePath"].toString()
-                    if(imagePath != null){
+                    //바로 로그인화면으로 돌아갈 때 글라이드에 걸려서 에러나는데 이럴 경우 현재 액티비티가 진행중이
+                    //아닐 때(finish아닐 경우) 글라이드를 실행해주게 함.(가끔 일어나는 에러라고 함.)
+                    if(imagePath != null && !(context as Activity).isFinishing){//https://sub-dev.tistory.com/5
                         GlideApp.with(context)
                             .load(imagePath)
                             .into(profileImage)
                         onComplete(imagePath)
+                        Log.d(TAG, "우측 상단 프로필 사진이 업로드되었습니다.")
                     }
                 }
             }

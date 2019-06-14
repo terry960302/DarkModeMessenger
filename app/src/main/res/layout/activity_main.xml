@@ -20,9 +20,10 @@
         <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/myProfile_imageview_mainActivity"
                 android:layout_gravity="right"
+                android:src="@drawable/users"
                 android:layout_marginRight="15dp"
                 android:elevation="10dp"
-                android:src="@drawable/users"
+                android:visibility="visible"
                 android:scaleType="centerCrop"
                 android:layout_width="40dp"
                 android:layout_height="40dp"

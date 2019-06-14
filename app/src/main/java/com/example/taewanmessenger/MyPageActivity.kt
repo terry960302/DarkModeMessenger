@@ -60,7 +60,7 @@ class MyPageActivity : AppCompatActivity() {
                             FirebaseFirestore.getInstance()
                                 .collection("유저")
                                 .document(FirebaseAuth.getInstance().uid.toString())
-                                .update("profileImagePath", null)
+                                .update("profileImagePath", "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7")
                         }
                     }
                 }
