@@ -12,6 +12,7 @@ import com.example.taewanmessenger.MainActivity
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.etc.GlideApp
 import com.example.taewanmessenger.R
+import com.example.taewanmessenger.Utils.FirestoreUtil
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.xwray.groupie.Item
@@ -55,50 +56,6 @@ class MainActivity_FriendsItem(val context : Context,
          * **/
         //아이템 짧게 클릭
         viewHolder.itemView.setOnClickListener {
-
-            //본인의 채팅방 경로
-            val myChannelRef = FirebaseFirestore.getInstance()
-                .collection("유저")
-                .document(auth.currentUser?.uid.toString())
-                .collection("채팅상대방")
-                .document(user.uid)
-            //상대방의 채팅방 경로
-            val yourChannelRef = FirebaseFirestore.getInstance()
-                .collection("유저")
-                .document(user.uid)
-                .collection("채팅상대방")
-                .document(auth.currentUser?.uid.toString())
-
-            Log.d(TAG, "채팅하고자하는 상대방의 이름은 ${user.name}입니다.")
-
-            //이미 채팅방이 만들어져있는지 확인
-            myChannelRef.get().addOnSuccessListener {
-                if(it.exists()){
-                    chatChannelId = it["channelId"].toString()
-                    return@addOnSuccessListener
-                }
-
-                //채팅방을 이름으로 해서 컬렉션 만들어줌.
-                val channelRef = FirebaseFirestore.getInstance()
-                    .collection("채팅방")
-                    .document()
-
-                channelRef.set(mapOf("0" to auth.currentUser?.uid.toString(), "1" to user.uid))
-
-                //채팅방 컬렉션에서 만든 도큐먼트 아이디를 유저 컬렉션 서브컬렉션에 저장
-                myChannelRef.set(mapOf("channelId" to channelRef.id))//내꺼에도 채팅방 아이디 만들어주고
-                    .addOnSuccessListener {
-                        Log.d(TAG, "본인 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
-                    }
-
-                yourChannelRef.set(mapOf("channelId" to channelRef.id))//상대방꺼에 동시에 채팅방 아이디 만들어줌
-                    .addOnSuccessListener {
-                        Log.d(TAG, "상대방 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
-                    }
-                chatChannelId = channelRef.id
-                // -> 이렇게 되면 하나의 채팅방을 둘이서 공유하는 방식이 됨.
-            }
-
             //다음 창 이동 + 유저 데이터(내정보 + 친구 정보 + 채팅방 id) 보내기
             val intent = Intent(context, ChatActivity::class.java)
             val bundle = Bundle()
@@ -107,7 +64,6 @@ class MainActivity_FriendsItem(val context : Context,
             context.startActivity(intent)
             Log.d(TAG, "MainActivity_FriendsItem -> ChatActivity로 이동합니다.")
         }
-
 
         viewHolder.itemView.setOnLongClickListener {
             AlertDialog.Builder(context)

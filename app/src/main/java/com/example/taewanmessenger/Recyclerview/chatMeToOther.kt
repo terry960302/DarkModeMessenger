@@ -4,16 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.View
-import android.view.Window
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.ViewCompat
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.R
 import com.example.taewanmessenger.etc.GlideApp
 import com.example.taewanmessenger.etc.ZoomActivity
-import com.example.taewanmessenger.etc.ZoomDialog
 import com.xwray.groupie.Item
 import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.message_layout_right.view.*
@@ -23,7 +20,6 @@ import java.util.*
 class chatMeToOther(val context : Context,
                     val chatModel : ChatModel) : Item<ViewHolder>() {
 
-    lateinit var dialog : ZoomDialog
 
     override fun getLayout(): Int = R.layout.message_layout_right
 

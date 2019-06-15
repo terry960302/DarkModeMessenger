@@ -301,7 +301,56 @@ object FirestoreUtil {
     /**
      * ChatActivity
      * **/
-    //채팅방 접근에 필요한 도큐먼트 아이디 가져오기
+
+    fun verifyChannelId(user : UserModel,
+                        onComplete: (String) -> Unit){
+
+
+        //본인의 채팅방 경로
+        val myChannelRef = FirebaseFirestore.getInstance()
+            .collection("유저")
+            .document(auth.currentUser?.uid.toString())
+            .collection("채팅상대방")
+            .document(user.uid)
+        //상대방의 채팅방 경로
+        val yourChannelRef = FirebaseFirestore.getInstance()
+            .collection("유저")
+            .document(user.uid)
+            .collection("채팅상대방")
+            .document(auth.currentUser?.uid.toString())
+
+        Log.d(TAG, "채팅하고자하는 상대방의 이름은 ${user.name}입니다.")
+
+        //이미 채팅방이 만들어져있는지 확인
+        myChannelRef.get().addOnSuccessListener {
+            if(it.exists()){//있으면 가져와서 씀
+                onComplete(it["channelId"].toString())
+                return@addOnSuccessListener
+            }
+
+            //채팅방을 이름으로 해서 컬렉션 만들어줌.
+            val channelRef = FirebaseFirestore.getInstance()
+                .collection("채팅방")
+                .document()
+
+            channelRef.set(mapOf("0" to auth.currentUser?.uid.toString(), "1" to user.uid))
+
+            //채팅방 컬렉션에서 만든 도큐먼트 아이디를 유저 컬렉션 서브컬렉션에 저장
+            myChannelRef.set(mapOf("channelId" to channelRef.id))//내꺼에도 채팅방 아이디 만들어주고
+                .addOnSuccessListener {
+                    Log.d(TAG, "본인 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
+                }
+
+            yourChannelRef.set(mapOf("channelId" to channelRef.id))//상대방꺼에 동시에 채팅방 아이디 만들어줌
+                .addOnSuccessListener {
+                    Log.d(TAG, "상대방 유저 컬렉션에 채팅방 아이디를 등록했습니다.")
+                }
+            onComplete(channelRef.id)
+            // -> 이렇게 되면 하나의 채팅방을 둘이서 공유하는 방식이 됨.
+        }
+
+    }
+   //채팅방 접근에 필요한 도큐먼트 아이디 가져오기
     fun getChannelId(userInfo : UserModel, onComplete: (String) -> Unit){
         firestoreInstance
             .collection("유저")

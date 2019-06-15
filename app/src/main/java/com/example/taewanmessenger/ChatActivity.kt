@@ -81,19 +81,18 @@ class ChatActivity : AppCompatActivity() {
         /**
          * 채팅방 생성(파이어스토어)
          * **/
-        //채널 아이디를 가져와서 그걸로 리사이클러뷰 설정과 메시지 보내기 설정함.
-        getChannelId(userInfo){
+        //채팅방 아이디 가져오기
+        FirestoreUtil.verifyChannelId(userInfo){
             chatChannelId = it
-            Log.d(TAG, "유저 -> 채팅상대방 에서 가져온 채널 아이디 = (${chatChannelId})")
 
             /**
-             * 리사이클러뷰 설정
+             * 리사이클러뷰 설정(채팅 목록 불러오기)
              * **/
             initRecyclerview(adapter, chatChannelId, progress_bar_chatActivity)
+
             /**
              * 채팅보내기 설정
              * **/
-
             //텍스트 메시지 보내기 버튼
             sendBtn_imageview_chatActivity.setOnClickListener {
                 if (TextUtils.isEmpty(chatInsert_edittext_chatActivity.text)) {
@@ -149,7 +148,7 @@ class ChatActivity : AppCompatActivity() {
                     val user = snapshot.toObject(UserModel::class.java)
                     val userToken = user?.FCMtoken
 
-                    //FCM토큰 주소로 보내기
+                    //상대방 FCM토큰 주소로 보내기
                     Thread().run {
                         var aysnTask = AsyncTask_for_FCM()
                         aysnTask.doInBackground(userToken.toString(), message)
