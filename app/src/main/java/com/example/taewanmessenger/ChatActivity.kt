@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -14,25 +15,34 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.example.taewanmessenger.FCM.AsyncTask_for_FCM
 import com.example.taewanmessenger.Recyclerview.chatMeToOther
 import com.example.taewanmessenger.Recyclerview.chatOtherToMe
 import com.example.taewanmessenger.Models.ChatModel
 import com.example.taewanmessenger.Models.UserModel
 import com.example.taewanmessenger.Utils.FirestoreUtil
+import com.example.taewanmessenger.Utils.FirestoreUtil.getChannelId
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.google.gson.Gson
+import com.google.logging.type.HttpRequest
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
 import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.jetbrains.anko.toast
+import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 
 class ChatActivity : AppCompatActivity() {
@@ -72,7 +82,7 @@ class ChatActivity : AppCompatActivity() {
          * 채팅방 생성(파이어스토어)
          * **/
         //채널 아이디를 가져와서 그걸로 리사이클러뷰 설정과 메시지 보내기 설정함.
-        FirestoreUtil.getChannelId(userInfo){
+        getChannelId(userInfo){
             chatChannelId = it
             Log.d(TAG, "유저 -> 채팅상대방 에서 가져온 채널 아이디 = (${chatChannelId})")
 
@@ -90,8 +100,11 @@ class ChatActivity : AppCompatActivity() {
                     toast("메시지를 작성해주세요.")
                 } else {
                     FirestoreUtil.sendTextMessage(chatChannelId, chatInsert_edittext_chatActivity) {
+                        //FCM을 보내준다.
+                        sendFCM_Message(userInfo, chatInsert_edittext_chatActivity.text.toString())
                         //다 보내고 나면 텍스트를 싹 지워준다.
                         chatInsert_edittext_chatActivity.text.clear()
+
                     }
                 }
             }
@@ -121,6 +134,65 @@ class ChatActivity : AppCompatActivity() {
             adapter,
             chats_recyclerview_chatActivity,
             progressbar)
+    }
+
+    private fun sendFCM_Message(usermodel : UserModel, message : String) {
+        //클릭한 상대방의 FCM토큰을 가져온다.(FCM토큰은 기계별로 받는 고유한 값)(하나의 기계면 계정이 여러개라도 토큰은 동일, 대신 앱 지웠다 다시 깔면 토큰도 새로줌.)
+        //그 토큰 주소로 메시지 내용을 쏴준다.
+        FirebaseFirestore.getInstance()
+            .collection("유저")
+            .document(usermodel.uid)
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null) return@addSnapshotListener
+                if(snapshot != null){
+                    //상대방의 FCM토큰이 들어있는 데이터를 가져옴.
+                    val user = snapshot.toObject(UserModel::class.java)
+                    val userToken = user?.FCMtoken
+
+                    //FCM토큰 주소로 보내기
+                    Thread().run {
+                        var aysnTask = AsyncTask_for_FCM()
+                        aysnTask.doInBackground(userToken.toString(), message)
+//                        try {
+//                            val root = JSONObject()
+//                            val notification = JSONObject()
+//
+//                            //FCM메시지 양식 생성
+//                            notification.put("title", FirebaseAuth.getInstance().currentUser?.displayName.toString())
+//                            notification.put("body", message)
+//
+//                            root.put("notification", notification)
+//                            root.put("to", user?.FCMtoken)
+//
+//                            Log.d(TAG, notification.toString())
+//                            Log.d(TAG, root.toString())//Json파일로 생성은 됨.
+//
+//                            //보내는 설정
+//                            val Url = URL(FCM_MESSAGE_URL)
+//                            val connection = Url.openConnection() as HttpURLConnection
+//                            connection.requestMethod = "POST"
+//                            connection.doOutput = true
+//                            connection.doInput = true
+//                            connection.addRequestProperty("Authorization", "key=${SERVER_KEY}")
+//                            connection.addRequestProperty("Accept", "application/json")
+//                            connection.addRequestProperty("Content-type", "application/json")
+//
+//                            val outputStream = connection.outputStream
+//                            outputStream.write(root.toString().toByteArray(Charsets.UTF_8));
+//                            connection.responseCode
+//                            Log.d(TAG, "FCM메시지를 성공적으로 보냈습니다.")
+////                            val retrofit = Retrofit.Builder()
+////                                .baseUrl(FCM_MESSAGE_URL)
+////                                .addConverterFactory(GsonConverterFactory.create())
+////                                .build()
+//
+//                        }catch (e : Exception){
+//                            e.printStackTrace()
+//                            Log.d(TAG, "FCM메시지 보내기에 실패했습니다. -> ${e.message}")
+//                        }
+                    }
+                }
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -174,6 +246,7 @@ class ChatActivity : AppCompatActivity() {
                                     )
                                 ).addOnSuccessListener {
                                     Log.d(TAG, "채팅 이미지를 파이어스토어에 업로드했습니다.")
+                                    sendFCM_Message(userInfo, "")
                                 }
                         }
                     }

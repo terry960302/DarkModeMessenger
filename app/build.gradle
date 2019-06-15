@@ -44,6 +44,7 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:4.1.0'
     implementation 'com.firebaseui:firebase-ui-storage:4.1.0'
     implementation 'com.google.firebase:firebase-core:16.0.9'
+    implementation 'com.google.firebase:firebase-messaging:17.6.0'//클라우드 메시징
 
     //코틀린 앙코
     implementation "org.jetbrains.anko:anko:$anko_version"
@@ -81,4 +82,8 @@ dependencies {
 
     //페이스북
     implementation 'com.facebook.android:facebook-login:[5,6)'
+
+    //Http통신, 즉 서버와 클라이언트 통신을 쉽게 레트로핏
+    implementation 'com.squareup.retrofit2:retrofit:2.6.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
 }

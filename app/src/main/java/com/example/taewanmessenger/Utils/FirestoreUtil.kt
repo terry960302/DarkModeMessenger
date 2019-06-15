@@ -48,7 +48,8 @@ object FirestoreUtil {
                     name = auth.currentUser?.displayName?: "",//null값일 경우 ""로 처리
                     email = auth.currentUser?.email?: "",
                     bio = "",
-                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7"
+                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7",
+                    FCMtoken = ""
                 )
                 userDocRef.set(newUser).addOnCompleteListener {
                     Log.d(TAG, "파이어스토어에 이메일로 가입한 유저 정보가 업로드 완료했습니다.")
@@ -71,7 +72,8 @@ object FirestoreUtil {
                     name = account?.displayName?:"",
                     email = account?.email?:"",
                     bio = "",
-                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7"
+                    profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7",
+                    FCMtoken = ""
                 )
                 userDocRef.set(newUser).addOnCompleteListener {
                     Log.d(TAG, "파이어스토어에 구글로 가입한 유저 정보가 업로드 완료했습니다.")
@@ -94,7 +96,8 @@ object FirestoreUtil {
                     name = user?.displayName.toString(),
                     email = user?.email.toString(),
                     profileImagePath = "https://firebasestorage.googleapis.com/v0/b/taewanmessenger.appspot.com/o/user6.png?alt=media&token=2f0c5f4f-85eb-489a-911d-4c94db9b51a7",
-                    bio = ""
+                    bio = "",
+                    FCMtoken = ""
                 )
                 userDocRef.set(newUser).addOnCompleteListener {
                     Log.d(TAG, "파이어스토어 페이스북 DB업로드 성공")
@@ -148,7 +151,8 @@ object FirestoreUtil {
                                 name = name,
                                 email = email,
                                 bio = bio,
-                                profileImagePath = profileImagePath
+                                profileImagePath = profileImagePath,
+                                FCMtoken = ""
                             )
                             adapter.add(SearchActivity_FriendsItem(context, searchedUser))
                             Log.d(TAG, "어댑터에 검색한 친구목록 띄우기 성공")
