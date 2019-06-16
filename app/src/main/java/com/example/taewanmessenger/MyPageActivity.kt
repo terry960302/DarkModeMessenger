@@ -1,18 +1,23 @@
 package com.example.taewanmessenger
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BlurMaskFilter
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.Window
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.request.RequestOptions
 import com.example.taewanmessenger.Utils.StorageUtil
+import com.example.taewanmessenger.etc.BioDialog
 import com.example.taewanmessenger.etc.GlideApp
 import com.google.android.gms.auth.api.signin.internal.Storage
 import com.google.firebase.auth.FirebaseAuth
@@ -27,13 +32,20 @@ import java.io.IOException
 class MyPageActivity : AppCompatActivity() {
 
     private val RC_GALLERY = 1001
+    private val auth : FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_page)
 
-        setSupportActionBar(toolbar)
-        supportActionBar?.title = FirebaseAuth.getInstance().currentUser?.displayName
+        /**
+         * 툴바 설정
+         * **/
+        setSupportActionBar(toolbar_myPage)
+//        supportActionBar?.setDisplayShowHomeEnabled(true)
+//        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_left_arrow)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "마이페이지"
 
         //프로필 이미지 가져오기
         val imagePath = intent.getStringExtra("profileImagePath")
@@ -45,9 +57,35 @@ class MyPageActivity : AppCompatActivity() {
                 .load(imagePath)
                 .into(backgroundProfileImage_imaegview_myPageActivity)
         }
+        profileName_textview_myPage.text = auth.currentUser?.displayName
+        profileEmail_textview_myPage.text = auth.currentUser?.email
+        FirebaseFirestore.getInstance()
+            .collection("유저")
+            .document(auth.uid.toString())
+            .addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                if(firebaseFirestoreException != null) return@addSnapshotListener
+                if(documentSnapshot != null){
+                    if(documentSnapshot["bio"] != null){
+                        bio_textview_myPage.text = documentSnapshot["bio"].toString()
+                    }
+                    else{
+                        bio_textview_myPage.text = ""
+                    }
+                }
+            }
 
+        //로티애니메이션 가져오는 메서드
+        getLottieAnim()
 
-        profileImage_app_bar_mypageActivity.setOnClickListener {
+        //자기소개 변경
+        bio_cardview_myPage.setOnClickListener {
+            val dialog = BioDialog(this)
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.show()
+        }
+        //프로필 사진 변경
+        centerProfileImage_imageview_myPageActivity.setOnClickListener {
             val list = arrayOf("앨범에서 사진 선택", "기본 이미지")
             AlertDialog.Builder(this@MyPageActivity)
                 .setItems(list) { dialog, which ->
@@ -65,6 +103,24 @@ class MyPageActivity : AppCompatActivity() {
                     }
                 }
                 .show()
+        }
+    }
+
+    private fun getLottieAnim() {
+        lottie1.apply {
+            this.setAnimation("onepiece.json")
+            this.loop(true)
+            this.playAnimation()
+        }
+        lottie2.apply {
+            this.setAnimation("deadpool.json")
+            this.loop(true)
+            this.playAnimation()
+        }
+        lottie3.apply {
+            this.setAnimation("car.json")
+            this.loop(true)
+            this.playAnimation()
         }
     }
 

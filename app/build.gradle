@@ -86,4 +86,7 @@ dependencies {
     //Http통신, 즉 서버와 클라이언트 통신을 쉽게 레트로핏
     implementation 'com.squareup.retrofit2:retrofit:2.6.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+
+    //에어비앤비 로티 애니메이션
+    implementation 'com.airbnb.android:lottie:2.3.0'
 }

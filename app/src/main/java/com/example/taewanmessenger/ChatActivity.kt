@@ -134,7 +134,10 @@ class ChatActivity : AppCompatActivity() {
             chats_recyclerview_chatActivity,
             progressbar)
     }
-
+    //참고 -> https://anhana.tistory.com/7
+    //위 블로그에서 대략적인 구상을 잡아놓으셨는데 내 앱에 맞게 다시 코드를 바꾸고
+    //http통신 부분은 거의 배낌(코틀린이라 변환정도만), 참고로 쓰레드위에서 실행시키되
+    //asyncTask 즉 비동기로도 실행해야함.(http통신이 끝날 때까지 앱이 멈춰있으면 안되기 때문->백그라운드 실행이라는 소리)
     private fun sendFCM_Message(usermodel : UserModel, message : String) {
         //클릭한 상대방의 FCM토큰을 가져온다.(FCM토큰은 기계별로 받는 고유한 값)(하나의 기계면 계정이 여러개라도 토큰은 동일, 대신 앱 지웠다 다시 깔면 토큰도 새로줌.)
         //그 토큰 주소로 메시지 내용을 쏴준다.
